@@ -387,4 +387,21 @@ public class MainTest {
         assertEquals(11, testClass3.getMethods().size());
         assertEquals(7, testClass4.getMethods().size());
     }
+
+    @Test
+    public void testExampleFromJar() throws Exception {
+        try {
+            FileUtils.moveDirectory(new File("src/test/resources/test-projects"),
+                    new File("src/test/resources/test-projects2"));
+        } catch (IOException ignored) {
+
+        }
+        testExample();
+        try {
+            FileUtils.moveDirectory(new File("src/test/resources/test-projects2"),
+                    new File("src/test/resources/test-projects"));
+        } catch (IOException ignored) {
+
+        }
+    }
 }
