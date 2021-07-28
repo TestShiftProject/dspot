@@ -55,8 +55,8 @@ public class OptionTest {
     @Test
     public void testInvalidInputCaughtByPreChecking() {
         Main.main(new String[]{});
-        String out = outContent.toString();
-        Assert.assertTrue(out.contains("You did not provide the path to the root folder of your project, which is " +
+        String err = errContent.toString();
+        Assert.assertTrue(err.contains("You did not provide the path to the root folder of your project, which is " +
                                        "mandatory.\n" +
                                        "eu.stamp_project.dspot.common.configuration.check.InputErrorException: Error " +
                                        "in the provided input. Please check your properties file and your " +
