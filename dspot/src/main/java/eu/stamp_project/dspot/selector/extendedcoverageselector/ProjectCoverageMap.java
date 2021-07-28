@@ -77,23 +77,4 @@ public class ProjectCoverageMap {
         return Objects.hash(classCoverageMaps);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder explanation = new StringBuilder("Project coverage map\n");
-        classCoverageMaps.forEach((className, classCoverageMap) -> {
-            explanation.append(className).append(":\n");
-            classCoverageMap.methodCoverageMap.forEach((methodName, methodCoverage) -> {
-                explanation.append(methodName).append("\n");
-                int index = -1;
-                for (Integer instructionImprovement : methodCoverage.lineCoverage) {
-                    index++;
-                    explanation.append("L. ").append(index + 1)
-                               .append(" ").append(instructionImprovement)
-                               .append(" instr.").append("\n");
-                }
-            });
-        });
-        explanation.replace(explanation.length() - 1, explanation.length(), "");
-        return explanation.toString();
-    }
 }
