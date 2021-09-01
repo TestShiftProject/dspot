@@ -391,15 +391,16 @@ public class MainTest {
     @Test
     public void testExampleFromJar() throws Exception {
         try {
-            FileUtils.moveDirectory(new File("src/test/resources/test-projects"),
-                    new File("src/test/resources/test-projects2"));
+            FileUtils.moveDirectory(new File("src/main/resources/test-projects"),
+                    new File("src/main/resources/test-projects2"));
+            //FileUtils.deleteDirectory(new File("src/main/resources/test-projects"));
         } catch (IOException ignored) {
 
         }
         testExample();
         try {
-            FileUtils.moveDirectory(new File("src/test/resources/test-projects2"),
-                    new File("src/test/resources/test-projects"));
+            FileUtils.moveDirectory(new File("src/main/resources/test-projects2"),
+                    new File("src/main/resources/test-projects"));
         } catch (IOException ignored) {
 
         }
