@@ -100,11 +100,28 @@ public final class Util {
             methodNamesAndMethodCoverages.sort(Comparator.comparingInt(e -> e.getValue().sum()));
 
             methodNamesAndMethodCoverages.forEach((entry) ->
+                    methodNames.add(entry.getKey())
+            );
+        });
+        return methodNames;
+    }
+
+    public static List<String> getCoveredMethodsWithClassName(CoverageImprovement coverageImprovement) {
+        List<String> methodNames = new ArrayList<>();
+        coverageImprovement.getInstructionImprovement().classCoverageMaps.forEach((className, classCoverageMap) -> {
+            List<Map.Entry<String, MethodCoverage>> methodNamesAndMethodCoverages =
+                    new ArrayList<>(classCoverageMap.methodCoverageMap.entrySet());
+
+            // put the methods with most additional coverage first (to be first in the name later)
+            methodNamesAndMethodCoverages.sort(Comparator.comparingInt(e -> e.getValue().sum()));
+
+            methodNamesAndMethodCoverages.forEach((entry) ->
                     methodNames.add(getSimpleNameFromFQ(className) + "." + entry.getKey())
             );
         });
         return methodNames;
     }
+
 
     /**
      * Checks whether a variable name was assigned by DSpot.

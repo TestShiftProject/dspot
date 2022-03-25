@@ -333,7 +333,7 @@ public class TestDescriptionGenerator implements Prettifier {
 
     private void addCoverageText(StringBuilder description, CtMethod<?> test,
                                  TestCaseJSON testCaseResult) {
-        List<String> coveredMethods = Util.getCoveredMethods(testCaseResult.getCoverageImprovement());
+        List<String> coveredMethods = Util.getCoveredMethodsWithClassName(testCaseResult.getCoverageImprovement());
         description.append(" This tests the method");
         if (coveredMethods.size() > 1) {
             description.append("s ");
