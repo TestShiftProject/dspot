@@ -70,7 +70,7 @@ public class AmplifierHelper {
                                             String suffix,
                                             String comment) {
         final Factory factory = testMethod.getFactory();
-        CtMethod methodClone = CloneHelper.cloneTestMethodForAmp(testMethod, suffix);
+        CtMethod<?> methodClone = CloneHelper.cloneTestMethodForAmp(testMethod, suffix);
 
         CtBodyHolder parent = methodClone.getElements(new TypeFilter<>(CtStatement.class))
                 .stream()
