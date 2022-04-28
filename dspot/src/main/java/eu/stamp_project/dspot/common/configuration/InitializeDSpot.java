@@ -18,6 +18,7 @@ import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
 import eu.stamp_project.dspot.common.report.output.Output;
 import eu.stamp_project.dspot.common.test_framework.TestFramework;
 import org.apache.commons.io.FileUtils;
+import spoon.reflect.factory.Factory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,9 @@ public class InitializeDSpot {
                 userInput,
                 dependencies
         ));
-        userInput.setFactory(DSpotState.getCompiler().getLauncher().getFactory());
+        Factory factory = DSpotState.getCompiler().getLauncher().getFactory();
+        factory.getEnvironment().setAutoImports(true);
+        userInput.setFactory(factory);
         initHelpers(userInput);
         DSpotState.setTestCompiler(new TestCompiler(
                 userInput.getNumberParallelExecutionProcessors(),

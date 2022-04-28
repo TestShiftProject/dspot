@@ -165,7 +165,7 @@ public class MainTest {
                 //                "--test-cases", "test1_mg12_assSep41,test1_mg13_failAssert0"
         });
         Assertions.assertTrue(new File(OUTPUT_PATH_TEST_SUITE_EXAMPLE).exists());
-        assertFileContains("Description has cast removed", "* Test that ex.charAt", OUTPUT_PATH_TEST_SUITE_EXAMPLE);
+        assertFileContains("Description has cast removed", "* Test that `ex.charAt", OUTPUT_PATH_TEST_SUITE_EXAMPLE);
     }
 
 
@@ -247,7 +247,7 @@ public class MainTest {
                 "     * Test that ", OUTPUT_PATH_TEST_SUITE_EXAMPLE);
         assertFileContains("Full prettified test case", " */\n" +
                 "    @Test(timeout = 10000)\n" +
-                "    public void testCharAt() throws Exception {\n" +
+                "    public void testCharAt1() throws Exception {\n" +
                 "        Example ex = new Example();\n" +
                 "        Assert.assertEquals('?', ex.charAt(\"?i!rb0/|]6^FT)-ef&bk\", -839241703));\n" +
                 "    }", OUTPUT_PATH_TEST_SUITE_EXAMPLE);

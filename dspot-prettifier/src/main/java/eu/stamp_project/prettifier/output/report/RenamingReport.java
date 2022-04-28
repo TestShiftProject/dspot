@@ -55,6 +55,10 @@ public class RenamingReport {
      * @param newExpression the new String representation of the expression (without casts).
      */
     public void addCastReduction(CtMethod<?> test, String oldExpression, String newExpression) {
+        if (oldExpression.equals(newExpression)) {
+            // no need to save this, nothing changed actually :)
+            return;
+        }
         reducedCasts.put(test.getSimpleName() + "#" + oldExpression, newExpression);
     }
 

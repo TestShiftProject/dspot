@@ -53,7 +53,7 @@ public class MethodRemoveAmplifier implements Amplifier {
         }
         Counter.updateInputOf(cloned, 1);
         DSpotUtils.addComment(ctStatementList, "MethodCallRemover: removed call '" + invocation + "'",
-                CtComment.CommentType.INLINE, CommentEnum.Amplifier);
+                CtComment.CommentType.BLOCK, CommentEnum.Amplifier);
         DSpotUtils.reportModification(method, cloned,
                 new MethodRemoveAmplifierReport(invocation.toString()));
         return cloned;

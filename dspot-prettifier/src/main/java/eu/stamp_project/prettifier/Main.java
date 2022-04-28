@@ -151,10 +151,15 @@ public class Main {
         // minimize test methods
         if (configuration.isApplyAllPrettifiers() || configuration.isApplyGeneralMinimizer() || configuration.isApplyPitMinimizer() || configuration.isApplyExtendedCoverageMinimizer()) {
             prettifiedTestMethods = applyMinimization(
-                    testMethods,
+                    prettifiedTestMethods,
                     amplifiedTestClass,
                     configuration
             );
+        }
+
+        // remove redundant casts
+        if (configuration.isApplyAllPrettifiers() || configuration.isRemoveRedundantCasts()) {
+            prettifiedTestMethods = new RedundantCastRemover().prettify(prettifiedTestMethods);
         }
 
         // rename test methods
@@ -165,11 +170,6 @@ public class Main {
         // rename local variables
         if (configuration.isApplyAllPrettifiers() || configuration.getVariableRenamer() != VariableRenamerEnum.None) {
             prettifiedTestMethods = applyVariableRenaming(prettifiedTestMethods, configuration);
-        }
-
-        // remove redundant casts
-        if (configuration.isApplyAllPrettifiers() || configuration.isRemoveRedundantCasts()) {
-            prettifiedTestMethods = new RedundantCastRemover().prettify(prettifiedTestMethods);
         }
 
         // generate test descriptions

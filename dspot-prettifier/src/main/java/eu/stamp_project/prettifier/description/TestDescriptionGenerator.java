@@ -128,11 +128,11 @@ public class TestDescriptionGenerator implements Prettifier {
             } else {
                 for (AmplifierReport report : exceptionAssertionReports) {
                     ExceptionAssertionReport exceptionAssertionReport = (ExceptionAssertionReport) report;
-                    description.append("a `");
-                    description.append(exceptionAssertionReport.getExceptionName());
-                    description.append("` and ");
+                    description.append("a ");
+                    addCodeText(description, exceptionAssertionReport.getExceptionName());
+                    description.append(" and ");
                 }
-                replaceEndIfThere(description, "` and ", "");
+                replaceEndIfThere(description, " and ", "");
                 description.append(" is thrown");
             }
         } else {
@@ -141,45 +141,44 @@ public class TestDescriptionGenerator implements Prettifier {
 
                 // TODO: move adding only "testedValue" to the top here again when it is assigned properly for
                 //  single-parameter assertions
-                description.append("`");
                 switch (valueAssertionReport.getAssertionType()) {
                     case ASSERT_NULL:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
                                 test));
-                        description.append("` is null");
+                        description.append(" is null");
                         break;
                     case ASSERT_NOT_NULL:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
                                 test));
-                        description.append("` is not null");
+                        description.append(" is not null");
                         break;
                     case ASSERT_TRUE:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
                                 test));
-                        description.append("` is true");
+                        description.append(" is true");
                         break;
                     case ASSERT_FALSE:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getExpectedValue(),
                                 test));
-                        description.append("` is false");
+                        description.append(" is false");
                         break;
                     case ASSERT_EQUALS:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getTestedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getTestedValue(),
                                 test));
-                        description.append("` is equal to ");
-                        description.append(valueAssertionReport.getExpectedValue());
+                        description.append(" is equal to ");
+                        addCodeText(description, valueAssertionReport.getExpectedValue());
                         break;
                     case ASSERT_NOT_EQUALS:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getTestedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getTestedValue(),
                                 test));
-                        description.append("` is not equal to ");
-                        description.append(valueAssertionReport.getExpectedValue());
+                        description.append(" is not equal to ");
+                        addCodeText(description, valueAssertionReport.getExpectedValue());
                         break;
                     case ASSERT_ARRAY_EQUALS:
-                        description.append(replaceLocalVariableIfPresent(valueAssertionReport.getTestedValue(),
+                        addCodeText(description, replaceLocalVariableIfPresent(valueAssertionReport.getTestedValue(),
                                 test));
-                        description.append("` is equal to the array ");
-                        description.append(valueAssertionReport.getExpectedValue());
+                        description.append(" is equal to the array ");
+                        addCodeText(description, valueAssertionReport.getExpectedValue());
                         break;
                     default:
                         break;
@@ -195,6 +194,7 @@ public class TestDescriptionGenerator implements Prettifier {
         description.append(" when ");
 
         // NOTE: Insert " and " in between these when there is more than one large modification in the amplified test!
+        // (e.g. when not using the developer-centric amplification in DSpot)
 
         addLiteralChangedText(description, modifications.getOrDefault(LiteralAmplifierReport.class.getCanonicalName(),
                 emptyList()), test);
@@ -227,12 +227,11 @@ public class TestDescriptionGenerator implements Prettifier {
                 AddLocalVariableAmplifierReport localVariableAmplifierReport = (AddLocalVariableAmplifierReport) amplifierReport;
                 if (description.indexOf(localVariableAmplifierReport.getVariableName()) != -1) {
                     // variable is used in description until now, so we should report its value!
-                    description.append(" `");
-                    description.append(localVariableAmplifierReport.getVariableName());
-                    description.append("` is `");
-                    description.append(replaceLocalVariableIfPresent(localVariableAmplifierReport.getVariableValue(),
+                    description.append(" ");
+                    addCodeText(description, localVariableAmplifierReport.getVariableName());
+                    description.append(" is ");
+                    addCodeText(description, replaceLocalVariableIfPresent(localVariableAmplifierReport.getVariableValue(),
                             test));
-                    description.append("`");
                     description.append(" and ");
                 }
             }
@@ -256,18 +255,16 @@ public class TestDescriptionGenerator implements Prettifier {
 
                 if (literalAmplifierReport.isLocalVariable()) {
                     description.append(literalAmplifierReport.getVariableName());
-                    description.append(" is `");
-                    description.append(replaceLocalVariableIfPresent(literalAmplifierReport.getNewValue(), test));
-                    description.append("`");
+                    description.append(" is ");
+                    addCodeText(description, replaceLocalVariableIfPresent(literalAmplifierReport.getNewValue(), test));
                 } else {
                     // new literal is method call parameter
-                    description.append("the parameter `");
-                    description.append(literalAmplifierReport.getVariableName());
-                    description.append("` of the method `");
-                    description.append(literalAmplifierReport.getMethodName());
-                    description.append("` is set to `");
-                    description.append(replaceLocalVariableIfPresent(literalAmplifierReport.getNewValue(), test));
-                    description.append("`");
+                    description.append("the parameter ");
+                    addCodeText(description, literalAmplifierReport.getVariableName());
+                    description.append(" of the method ");
+                    addCodeText(description, literalAmplifierReport.getMethodName());
+                    description.append(" is set to ");
+                    addCodeText(description, replaceLocalVariableIfPresent(literalAmplifierReport.getNewValue(), test));
                 }
                 description.append(" and ");
             }
@@ -283,23 +280,23 @@ public class TestDescriptionGenerator implements Prettifier {
         for (AmplifierReport amplifierReport : modifications) {
             if (amplifierReport.getReportType().equals(MethodDuplicationAmplifierReport.class.getCanonicalName())) {
                 MethodDuplicationAmplifierReport methodDuplicationAmplifierReport = (MethodDuplicationAmplifierReport) amplifierReport;
-                description.append("`");
-                description.append(methodDuplicationAmplifierReport.getDuplicatedCall());
-                description.append("` is called");
+                addCodeText(description, methodDuplicationAmplifierReport.getDuplicatedCall());
+                description.append(" is called");
+
             } else if (amplifierReport.getReportType().equals(MethodAdderOnExistingObjectsAmplifierReport.class.getCanonicalName())) {
                 MethodAdderOnExistingObjectsAmplifierReport methodAdderOnExistingObjectsAmplifierReport =
                         (MethodAdderOnExistingObjectsAmplifierReport) amplifierReport;
-                description.append("`");
-                description.append(methodAdderOnExistingObjectsAmplifierReport.getInvokedMethod().getName());
+                addCodeText(description, methodAdderOnExistingObjectsAmplifierReport.getInvokedMethod().getName());
+                description.append(" is called");
+
                 List<MethodAdderOnExistingObjectsAmplifierReport.MethodParameter> parameters =
                         methodAdderOnExistingObjectsAmplifierReport.getInvokedMethod().getParameters();
                 if (parameters.isEmpty()) {
-                    description.append("` is called");
+                    description.append(" is called");
                 } else {
-                    description.append("` is called");
                     description.append(" with the parameter");
                     if (parameters.size() > 1) {
-                        description.append("s `");
+                        description.append("s ");
                     } else {
                         description.append(" ");
                     }
@@ -326,9 +323,8 @@ public class TestDescriptionGenerator implements Prettifier {
         for (AmplifierReport amplifierReport : modifications) {
             if (amplifierReport.getReportType().equals(MethodRemoveAmplifierReport.class.getCanonicalName())) {
                 MethodRemoveAmplifierReport methodRemoveAmplifierReport = (MethodRemoveAmplifierReport) amplifierReport;
-                description.append("`");
-                description.append(methodRemoveAmplifierReport.getRemovedCall());
-                description.append("` is not called");
+                addCodeText(description, methodRemoveAmplifierReport.getRemovedCall());
+                description.append(" is not called");
             }
             description.append(" and ");
         }
@@ -346,16 +342,16 @@ public class TestDescriptionGenerator implements Prettifier {
             description.append(" ");
         }
         for (int i = 0; i < Math.min(coveredMethods.size(), 2); i++) {
-            description.append("`");
-            description.append(coveredMethods.get(i));
-            description.append("`");
+            addCodeText(description, coveredMethods.get(i));
             description.append(" and ");
         }
         replaceEndByPeriodIfThere(description, " and ");
     }
 
     private void addOriginalTestText(StringBuilder description, CtMethod<?> test, TestCaseJSON testCaseResult) {
-        description.append(" This test is based on the test `").append(testCaseResult.getNameOfBaseTestCase()).append("`.");
+        description.append(" This test is based on the test ");
+        addCodeText(description, testCaseResult.getNameOfBaseTestCase());
+        description.append(".");
     }
 
     private void replaceEndIfThere(StringBuilder description, String textToReplace, String replacement) {
@@ -414,6 +410,16 @@ public class TestDescriptionGenerator implements Prettifier {
         }
 
         return newSnippet;
+    }
+
+    /**
+     * Appends the codeText to the StringBuilder, surrounded by backticks
+     *
+     * @param description the StringBuilder
+     * @param codeText    the text to insert
+     */
+    private void addCodeText(StringBuilder description, String codeText) {
+        description.append("`").append(codeText).append("`");
     }
 
     private String replaceRenamedTextsIfPresent(String description, CtMethod<?> test) {

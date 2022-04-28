@@ -68,7 +68,6 @@ public class DevFriendlyTestFilter implements Prettifier {
      */
     private List<CtMethod<?>> filterExceptionTests(List<CtMethod<?>> tests, ClassModificationReport modificationReport) {
         List<CtMethod<?>> filteredTests = new ArrayList<>();
-        List<CtMethod<?>> remainingTests = new ArrayList<>();
         for (CtMethod<?> test : tests) {
             List<AmplifierReport> modificationsForTest = modificationReport.getModificationsForTest(test);
             if (modificationsForTest.stream().anyMatch(reports ->
