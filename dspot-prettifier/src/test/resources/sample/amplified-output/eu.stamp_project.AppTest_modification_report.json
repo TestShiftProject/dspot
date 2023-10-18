@@ -1,0 +1,11 @@
+{
+  "reportsPerMethod": {
+    "testException": [
+      {
+        "exceptionName": "TestingSomethingException",
+        "assertionReport": true,
+        "reportType": "eu.stamp_project.dspot.common.report.output.assertiongenerator.ExceptionAssertionReport"
+      }
+    ]
+  }
+}

@@ -1,38 +1,39 @@
 package eu.stamp_project.prettifier;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import eu.stamp_project.dspot.common.automaticbuilder.AutomaticBuilder;
-import eu.stamp_project.prettifier.code2vec.Code2VecExecutor;
-import eu.stamp_project.prettifier.code2vec.Code2VecParser;
-import eu.stamp_project.prettifier.code2vec.Code2VecWriter;
-import eu.stamp_project.prettifier.context2name.Context2Name;
-import eu.stamp_project.prettifier.minimization.GeneralMinimizer;
-import eu.stamp_project.prettifier.minimization.Minimizer;
-import eu.stamp_project.prettifier.minimization.PitMutantMinimizer;
-import eu.stamp_project.prettifier.options.UserInput;
-import eu.stamp_project.prettifier.output.PrettifiedTestMethods;
-import eu.stamp_project.prettifier.output.report.ReportJSON;
-import eu.stamp_project.dspot.common.test_framework.TestFramework;
-import eu.stamp_project.dspot.common.compilation.DSpotCompiler;
 import eu.stamp_project.dspot.common.configuration.DSpotState;
 import eu.stamp_project.dspot.common.configuration.InitializeDSpot;
 import eu.stamp_project.dspot.common.configuration.check.Checker;
 import eu.stamp_project.dspot.common.configuration.check.InputErrorException;
+import eu.stamp_project.dspot.common.test_framework.TestFramework;
+import eu.stamp_project.prettifier.configuration.TestRenamerEnum;
+import eu.stamp_project.prettifier.configuration.UserInput;
+import eu.stamp_project.prettifier.configuration.VariableRenamerEnum;
+import eu.stamp_project.prettifier.description.TestDescriptionGenerator;
+import eu.stamp_project.prettifier.filter.DevFriendlyTestFilter;
+import eu.stamp_project.prettifier.minimization.ExtendedCoverageMinimizer;
+import eu.stamp_project.prettifier.minimization.GeneralMinimizer;
+import eu.stamp_project.prettifier.minimization.Minimizer;
+import eu.stamp_project.prettifier.minimization.PitMutantMinimizer;
+import eu.stamp_project.prettifier.output.PrettifiedTestMethods;
+import eu.stamp_project.prettifier.output.report.ReportJSON;
+import eu.stamp_project.prettifier.prioritize.MostAddedCoveragePrioritizer;
+import eu.stamp_project.prettifier.testnaming.Code2VecTestRenamer;
+import eu.stamp_project.prettifier.testnaming.ImprovedCoverageTestRenamer;
+import eu.stamp_project.prettifier.variablenaming.Context2NameVariableRenamer;
+import eu.stamp_project.prettifier.variablenaming.SimpleVariableRenamer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import spoon.Launcher;
 import spoon.reflect.code.CtStatement;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.filter.TypeFilter;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -45,7 +46,8 @@ public class Main {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    public static ReportJSON report = new ReportJSON();
+    public static ReportJSON report;
+    private static DSpotState dSpotState;
 
     public static void main(String[] args) {
         UserInput inputConfiguration = new UserInput();
@@ -76,22 +78,60 @@ public class Main {
             commandLine.usage(System.err);
             return;
         }
-        DSpotState.verbose = inputConfiguration.isVerbose();
-        run(inputConfiguration);
+
+        InitializeDSpot initializeDSpot = new InitializeDSpot();
+        initializeDSpot.init(inputConfiguration);
+        dSpotState = initializeDSpot.getDSpotState();
+        report = new ReportJSON(inputConfiguration);
+        long startTime = System.currentTimeMillis();
+
+        runPrettifier(inputConfiguration);
+
+        final long elapsedTime = System.currentTimeMillis() - startTime;
+        LOGGER.info("Reduced tests in {} ms.",
+                elapsedTime
+        );
     }
 
-    public static void run(UserInput configuration) {
-        final CtType<?> amplifiedTestClass = loadAmplifiedTestClass(configuration);
+    public static void runPrettifier(UserInput configuration) {
+
+        if (dSpotState.getTestClassesToBeAmplified().size() > 1) {
+            LOGGER.error("More than one test class passed! The prettifier can only process one amplified test class " +
+                    "at a time.");
+            return;
+        }
+        if (dSpotState.getTestClassesToBeAmplified().size() < 1 && configuration.getPathToAmplifiedTestClass().isEmpty()) {
+            LOGGER.error("No test class passed! Please pass the class to be prettified with --test or --path-to" +
+                    "-amplified-test-class");
+            return;
+        }
+        CtType<?> amplifiedTestClass;
+        if (configuration.getPathToAmplifiedTestClass().isEmpty()) {
+            amplifiedTestClass = dSpotState.getTestClassesToBeAmplified().get(0);
+        } else {
+            amplifiedTestClass = loadAmplifiedTestClassFromFile(configuration);
+        }
+
+        // already enable auto-imports, to make the replacements be recorded in the same text that will be in the
+        // final printed class
+        amplifiedTestClass.getFactory().getEnvironment().setAutoImports(true);
+
+        final List<CtMethod<?>> testMethods =
+                dSpotState.getTestFinder().findTestMethods(amplifiedTestClass,
+                        dSpotState.getTestMethodsToBeAmplifiedNames());
+        Main.report.nbTestMethods = testMethods.size();
+
         final List<CtMethod<?>> prettifiedAmplifiedTestMethods =
-                run(
+                prettify(
                         amplifiedTestClass,
+                        testMethods,
                         configuration
                 );
-        // output now
+
         output(amplifiedTestClass, prettifiedAmplifiedTestMethods, configuration);
     }
 
-    public static CtType<?> loadAmplifiedTestClass(UserInput configuration) {
+    public static CtType<?> loadAmplifiedTestClassFromFile(UserInput configuration) {
         Launcher launcher = new Launcher();
         launcher.getEnvironment().setNoClasspath(true);
         launcher.addInputResource(configuration.getPathToAmplifiedTestClass());
@@ -99,43 +139,49 @@ public class Main {
         return launcher.getFactory().Class().getAll().get(0);
     }
 
-    public static List<CtMethod<?>> run(CtType<?> amplifiedTestClass,
-                                        UserInput configuration) {
-        InitializeDSpot initializeDSpot = new InitializeDSpot();
-        final AutomaticBuilder automaticBuilder = configuration.getBuilderEnum().getAutomaticBuilder(configuration);
-        final String dependencies = initializeDSpot.completeDependencies(configuration, automaticBuilder);
-        final DSpotCompiler compiler = DSpotCompiler.createDSpotCompiler(
-                configuration,
-                dependencies
-        );
-        configuration.setFactory(compiler.getLauncher().getFactory());
-        initializeDSpot.initHelpers(configuration);
+    public static List<CtMethod<?>> prettify(CtType<?> amplifiedTestClass, List<CtMethod<?>> testMethods,
+                                             UserInput configuration) {
+        List<CtMethod<?>> prettifiedTestMethods = testMethods;
 
-        final List<CtMethod<?>> testMethods = TestFramework.getAllTest(amplifiedTestClass);
-        Main.report.nbTestMethods = testMethods.size();
-        final List<CtMethod<?>> minimizedAmplifiedTestMethods;
+        // filter test methods
+        if (configuration.isFilterDevFriendly()) {
+            prettifiedTestMethods = new DevFriendlyTestFilter().prettify(prettifiedTestMethods);
+        }
 
-        // 1 minimize amplified test methods
-        if (configuration.isApplyAllPrettifiers() ||  configuration.isApplyGeneralMinimizer() || configuration.isApplyPitMinimizer()) {
-            minimizedAmplifiedTestMethods = applyMinimization(
-                    testMethods,
+        // minimize test methods
+        if (configuration.isApplyAllPrettifiers() || configuration.isApplyGeneralMinimizer() || configuration.isApplyPitMinimizer() || configuration.isApplyExtendedCoverageMinimizer()) {
+            prettifiedTestMethods = applyMinimization(
+                    prettifiedTestMethods,
                     amplifiedTestClass,
                     configuration
             );
-        } else {
-            minimizedAmplifiedTestMethods = testMethods;
         }
-        // 2 rename test methods
-        if (configuration.isApplyAllPrettifiers() || configuration.isRenameTestMethods()) {
-            applyCode2Vec(minimizedAmplifiedTestMethods, configuration);
+
+        // remove redundant casts
+        if (configuration.isApplyAllPrettifiers() || configuration.isRemoveRedundantCasts()) {
+            prettifiedTestMethods = new RedundantCastRemover().prettify(prettifiedTestMethods);
         }
-        // 3 rename local variables TODO train one better model
-        final List<CtMethod<?>> prettifiedTestMethods;
-        if (configuration.isApplyAllPrettifiers() || configuration.isRenameLocalVariables()) {
-            prettifiedTestMethods = applyContext2Name(minimizedAmplifiedTestMethods);
-        } else {
-            prettifiedTestMethods = minimizedAmplifiedTestMethods;
+
+        // rename test methods
+        if (configuration.isApplyAllPrettifiers() || configuration.getTestRenamer() != TestRenamerEnum.None) {
+            prettifiedTestMethods = applyTestRenaming(prettifiedTestMethods, configuration);
         }
+
+        // rename local variables
+        if (configuration.isApplyAllPrettifiers() || configuration.getVariableRenamer() != VariableRenamerEnum.None) {
+            prettifiedTestMethods = applyVariableRenaming(prettifiedTestMethods, configuration);
+        }
+
+        // generate test descriptions
+        if (configuration.isApplyAllPrettifiers() || configuration.isGenerateTestDescriptions()) {
+            prettifiedTestMethods = new TestDescriptionGenerator(configuration).prettify(prettifiedTestMethods);
+        }
+
+        // prioritize test methods
+        if (configuration.isPrioritizeMostCoverage()) {
+            prettifiedTestMethods = new MostAddedCoveragePrioritizer().prettify(prettifiedTestMethods);
+        }
+
         return prettifiedTestMethods;
     }
 
@@ -174,6 +220,19 @@ public class Main {
             );
         }
 
+        // 3 apply extended coverage minimization
+        if (configuration.isApplyAllPrettifiers() || configuration.isApplyExtendedCoverageMinimizer()) {
+            final AutomaticBuilder automaticBuilder = configuration.getBuilderEnum().getAutomaticBuilder(configuration);
+            amplifiedTestMethodsToBeMinimized = Main.applyGivenMinimizer(
+                    new ExtendedCoverageMinimizer(
+                            amplifiedTestClass,
+                            automaticBuilder,
+                            configuration
+                    ),
+                    amplifiedTestMethodsToBeMinimized
+            );
+        }
+
         Main.report.medianNbStatementAfter = Main.getMedian(amplifiedTestMethodsToBeMinimized.stream()
                 .map(ctMethod -> ctMethod.getElements(new TypeFilter<>(CtStatement.class)))
                 .map(List::size)
@@ -190,54 +249,34 @@ public class Main {
         return minimizedAmplifiedTestMethods;
     }
 
-    public static void applyCode2Vec(List<CtMethod<?>> amplifiedTestMethodsToBeRenamed,
-                                     UserInput configuration) {
-        Code2VecWriter writer = new Code2VecWriter(configuration.getPathToRootOfCode2Vec());
-        Code2VecParser parser = new Code2VecParser();
-        Code2VecExecutor code2VecExecutor = null;
-        try {
-            code2VecExecutor = new Code2VecExecutor(
-                    configuration.getPathToRootOfCode2Vec(),
-                    configuration.getRelativePathToModelForCode2Vec(),
-                    configuration.getTimeToWaitForCode2vecInMillis()
-            );
-            for (CtMethod<?> amplifiedTestMethodToBeRenamed : amplifiedTestMethodsToBeRenamed) {
-                writer.writeCtMethodToInputFile(amplifiedTestMethodToBeRenamed);
-                code2VecExecutor.run();
-                final String code2vecOutput = code2VecExecutor.getOutput();
-                final String predictedSimpleName = parser.parse(code2vecOutput);
-                LOGGER.info("Code2Vec predicted {} for {} as new name", predictedSimpleName, amplifiedTestMethodToBeRenamed.getSimpleName());
-                amplifiedTestMethodToBeRenamed.setSimpleName(predictedSimpleName);
-            }
-        } finally {
-            if (code2VecExecutor != null) {
-                code2VecExecutor.stop();
-            }
+    private static List<CtMethod<?>> applyTestRenaming(List<CtMethod<?>> testMethods, UserInput configuration) {
+        List<CtMethod<?>> prettifiedTestMethods = testMethods;
+        if (configuration.isApplyAllPrettifiers() || configuration.getTestRenamer() == TestRenamerEnum.ImprovedCoverageTestRenamer) {
+            prettifiedTestMethods = new ImprovedCoverageTestRenamer(configuration).prettify(prettifiedTestMethods);
+            Main.report.renamingReport.updateOtherReportsAfterTestRenaming();
         }
+        if (configuration.isApplyAllPrettifiers() || configuration.getTestRenamer() == TestRenamerEnum.Code2VecTestRenamer) {
+            prettifiedTestMethods = new Code2VecTestRenamer(configuration).prettify(prettifiedTestMethods);
+        }
+        return prettifiedTestMethods;
     }
 
-    public static List<CtMethod<?>> applyContext2Name(List<CtMethod<?>> amplifiedTestMethods) {
-        Context2Name context2name = new Context2Name();
-        CtClass tmpClass = Launcher.parseClass("class Tmp {}");
-        // remember the order
-        List<String> methodNameList = new ArrayList<>();
-        for (CtMethod<?> amplifiedTestMethod : amplifiedTestMethods) {
-            methodNameList.add(amplifiedTestMethod.getSimpleName());
+    private static List<CtMethod<?>> applyVariableRenaming(List<CtMethod<?>> testMethods, UserInput configuration) {
+        List<CtMethod<?>> prettifiedTestMethods = testMethods;
+        if (configuration.isApplyAllPrettifiers() || configuration.getVariableRenamer() == VariableRenamerEnum.SimpleVariableRenamer) {
+            prettifiedTestMethods = new SimpleVariableRenamer().prettify(prettifiedTestMethods);
         }
-        // apply Context2Name
-        tmpClass.setMethods(new HashSet<>(amplifiedTestMethods));
-        String strTmpClass = tmpClass.toString();
-        String strProcessedClass = context2name.process(strTmpClass);
-        CtClass processedClass = Launcher.parseClass(strProcessedClass);
-        // restore the order
-        List<CtMethod<?>> prettifiedMethodList = new ArrayList<>();
-        methodNameList.forEach(methodName -> {
-            prettifiedMethodList.addAll(processedClass.getMethodsByName(methodName));
-        });
-        return prettifiedMethodList;
+        // TODO train one better model
+        if (configuration.isApplyAllPrettifiers() || configuration.getVariableRenamer() == VariableRenamerEnum.Context2NameVariableRenamer) {
+            prettifiedTestMethods = new Context2NameVariableRenamer().prettify(prettifiedTestMethods);
+        }
+        return prettifiedTestMethods;
     }
 
     public static <T extends Number & Comparable<T>> Double getMedian(List<T> list) {
+        if (list.isEmpty()) {
+            return (double) 0;
+        }
         Collections.sort(list);
         return list.size() % 2 == 0 ?
                 list.stream().skip(list.size() / 2 - 1).limit(2).mapToDouble(value -> new Double(value.toString())).average().getAsDouble() :
@@ -249,16 +288,7 @@ public class Main {
                               UserInput configuration) {
         new PrettifiedTestMethods(configuration.getOutputDirectory())
                 .output(amplifiedTestClass, prettifiedAmplifiedTestMethods);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        final String pathname = configuration.getOutputDirectory() +
-                "/" + amplifiedTestClass.getSimpleName() + "report.json";
-        LOGGER.info("Output a report in {}", pathname);
-        final File file = new File(pathname);
-        try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write(gson.toJson(Main.report));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Main.report.output(configuration, amplifiedTestClass);
     }
 
 }

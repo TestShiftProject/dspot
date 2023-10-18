@@ -1,5 +1,6 @@
 package eu.stamp_project.dspot.common.miscellaneous;
 
+import com.googlecode.junittoolbox.ParallelRunner;
 import eu.stamp_project.dspot.common.test_framework.TestFramework;
 import spoon.reflect.declaration.CtAnnotation;
 import spoon.reflect.declaration.CtMethod;
@@ -8,8 +9,6 @@ import spoon.reflect.factory.Factory;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-
-import com.googlecode.junittoolbox.ParallelRunner;
 
 /**
  * Created by Benjamin DANGLOT
@@ -103,6 +102,23 @@ public class CloneHelper {
     public static CtType cloneTestClassAndAddGivenTest(CtType original, List<CtMethod<?>> methods) {
         CtType clone = original.clone();
         original.getPackage().addType(clone);
+        methods.forEach(clone::addMethod);
+        return clone;
+    }
+
+    /**
+     * Clones the test class, removes all existing test cases in it and adds the given test methods.
+     *
+     * @param original Test class
+     * @param methods  Test methods
+     * @return Test class with new methods
+     */
+    public static CtType<?> cloneTestClassRemoveOldTestsAndAddGivenTest(CtType<?> original, List<CtMethod<?>> methods) {
+        CtType<?> clone = original.clone();
+        original.getPackage().addType(clone);
+        clone.getMethods().stream()
+                .filter(TestFramework.get()::isTest)
+                .forEach(clone::removeMethod);
         methods.forEach(clone::addMethod);
         return clone;
     }

@@ -1,8 +1,8 @@
 package eu.stamp_project.dspot.common.compilation;
 
+import eu.stamp_project.dspot.common.configuration.DSpotState;
 import eu.stamp_project.dspot.common.configuration.UserInput;
 import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
-import eu.stamp_project.dspot.common.configuration.DSpotState;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.slf4j.Logger;
@@ -10,12 +10,7 @@ import org.slf4j.LoggerFactory;
 import spoon.Launcher;
 import spoon.OutputType;
 import spoon.SpoonModelBuilder;
-import spoon.compiler.builder.AdvancedOptions;
-import spoon.compiler.builder.AnnotationProcessingOptions;
-import spoon.compiler.builder.ClasspathOptions;
-import spoon.compiler.builder.ComplianceOptions;
-import spoon.compiler.builder.JDTBuilderImpl;
-import spoon.compiler.builder.SourceOptions;
+import spoon.compiler.builder.*;
 import spoon.support.compiler.FileSystemFolder;
 import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
@@ -97,7 +92,10 @@ public class DSpotCompiler extends JDTBasedSpoonCompiler {
 		finalArgs[0] = "-proceedOnError";
 		System.arraycopy(args, 0, finalArgs, 1, args.length);
 
-		LOGGER.info("Compiling with {}", String.join(" ", finalArgs));
+
+		if (DSpotState.verbose) {
+			LOGGER.info("Compiling with {}", String.join(" ", finalArgs));
+		}
 
 		compiler.compile(finalArgs);
 		environment = compiler.getEnvironment();

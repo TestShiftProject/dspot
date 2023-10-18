@@ -5,12 +5,8 @@ import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
 import eu.stamp_project.dspot.common.miscellaneous.Counter;
 import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
 import eu.stamp_project.dspot.common.miscellaneous.TypeUtils;
-import spoon.reflect.code.CtBlock;
-import spoon.reflect.code.CtComment;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtStatement;
+import eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -27,6 +23,9 @@ import java.util.stream.Stream;
  * Created by Benjamin DANGLOT
  * benjamin.danglot@inria.fr
  * on 19/07/18
+ * <p>
+ * This amplifier finds method invocations that return an object, save that object into a variable and calls methods
+ * on that variable.
  */
 @SuppressWarnings("unchecked")
 public class ReturnValueAmplifier implements Amplifier {
@@ -41,33 +40,38 @@ public class ReturnValueAmplifier implements Amplifier {
                                 !TypeUtils.isPrimitive(invocation.getType()) &&
                                 !TypeUtils.isString(invocation.getType())
                 ).forEach(invocation -> {
-            List<CtMethod<?>> methodsWithTargetType = AmplifierHelper.findMethodsWithTargetType(invocation.getType());
-            if (!methodsWithTargetType.isEmpty()) {
-                int indexOfInvocation = getIndexOf(testMethod, invocation);
-                CtLocalVariable localVar = testMethod.getFactory().Code().createLocalVariable(
-                        invocation.getType(),
-                        "__DSPOT_invoc_" + indexOfInvocation,
-                        invocation.clone());
-                CtExpression<?> target = AmplifierHelper.createLocalVarRef(localVar);
-                CtMethod methodClone = CloneHelper.cloneTestMethodForAmp(testMethod, ""); // no need to suffix here, since it will be recloned after that
-                replaceInvocationByLocalVariable(
-                        methodClone.getElements(new TypeFilter<>(CtStatement.class)).get(indexOfInvocation),
-                        localVar
-                );
-                DSpotUtils.addComment(localVar,
-                        "StatementAdd: generate variable from return value",
-                        CtComment.CommentType.INLINE,
-                        CommentEnum.Amplifier);
-                ampMethods.addAll(methodsWithTargetType.stream()
-                        .map(addMth -> AmplifierHelper.addInvocation(methodClone, addMth, target, localVar, "_rv", "ReturnValueAmplifier: add method call"))
-                        .collect(Collectors.toList()));
-                Counter.updateInputOf(methodClone, 1);
-            }
-        });
+                    List<CtMethod<?>> methodsWithTargetType = AmplifierHelper.findMethodsWithTargetType(invocation.getType());
+                    if (!methodsWithTargetType.isEmpty()) {
+                        int indexOfInvocation = getIndexOf(testMethod, invocation);
+                        CtLocalVariable<?> localVar = testMethod.getFactory().Code().createLocalVariable(
+                                invocation.getType(),
+                                "__DSPOT_invoc_" + indexOfInvocation,
+                                invocation.clone());
+                        CtExpression<?> target = AmplifierHelper.createLocalVarRef(localVar);
+                        CtMethod<?> methodClone = CloneHelper.cloneTestMethodForAmp(testMethod, ""); // no need to suffix here,
+                        // since it will be recloned after that
+                        replaceInvocationByLocalVariable(
+                                methodClone.getElements(new TypeFilter<>(CtStatement.class)).get(indexOfInvocation),
+                                localVar
+                        );
+                        DSpotUtils.addComment(localVar,
+                                "StatementAdd: generate variable from return value",
+                                CtComment.CommentType.INLINE,
+                                CommentEnum.Amplifier);
+                        DSpotUtils.reportModification(testMethod, methodClone,
+                                new AddLocalVariableAmplifierReport(localVar.getSimpleName(),
+                                        localVar.getAssignment().toString(), false));
+                        ampMethods.addAll(methodsWithTargetType.stream()
+                                .map(addMth -> AmplifierHelper.addInvocation(methodClone, addMth, target, localVar, "_rv", "ReturnValueAmplifier: add method call"))
+                                .collect(Collectors.toList()));
+                        Counter.updateInputOf(methodClone, 1);
+                    }
+                });
         return ampMethods.stream();
     }
 
-    private void replaceInvocationByLocalVariable(CtStatement invocationToBeReplaced, CtLocalVariable localVariable) {
+    private void replaceInvocationByLocalVariable(CtStatement invocationToBeReplaced,
+                                                  CtLocalVariable<?> localVariable) {
         if (invocationToBeReplaced.getParent() instanceof CtBlock) {
             invocationToBeReplaced.replace(localVariable);
         } else {
@@ -80,7 +84,7 @@ public class ReturnValueAmplifier implements Amplifier {
         }
     }
 
-    private int getIndexOf(CtMethod originalMethod, CtInvocation originalInvocation) {
+    private int getIndexOf(CtMethod<?> originalMethod, CtInvocation<?> originalInvocation) {
         final List<CtStatement> statements = originalMethod.getElements(new TypeFilter<>(CtStatement.class));
         int i;
         for (i = 0; i < statements.size(); i++) {
@@ -96,7 +100,7 @@ public class ReturnValueAmplifier implements Amplifier {
 
     // return all invocations inside the given method
     private List<CtInvocation> getInvocations(CtMethod<?> method) {
-        List<CtInvocation> statements = Query.getElements(method, new TypeFilter(CtInvocation.class));
+        List<CtInvocation<?>> statements = Query.getElements(method, new TypeFilter<>(CtInvocation.class));
         return statements.stream()
                 .filter(invocation -> invocation.getParent() instanceof CtBlock)
                 //.filter(stmt -> stmt.getExecutable().getDeclaringType().getQualifiedName().startsWith(filter)) // filter on the name for amplify a specific type

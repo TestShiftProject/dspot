@@ -14,6 +14,7 @@ import eu.stamp_project.dspot.selector.extendedcoverageselector.CoverageImprovem
 import eu.stamp_project.dspot.selector.extendedcoverageselector.ExtendedCoverage;
 import eu.stamp_project.testrunner.EntryPoint;
 import eu.stamp_project.testrunner.listener.CoveragePerTestMethod;
+import eu.stamp_project.testrunner.runner.ParserOptions;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
@@ -23,6 +24,9 @@ import spoon.reflect.declaration.CtType;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Selects amplified test cases based on whether they cover new instructions in the code.
+ */
 public class ExtendedCoverageSelector extends TakeAllSelector {
 
     ExtendedCoverage initialCoverage;
@@ -33,10 +37,18 @@ public class ExtendedCoverageSelector extends TakeAllSelector {
 
     Map<CtMethod<?>, ExtendedCoverage> fullCoveragePerAmplifiedMethod;
 
+    private TestSelectorElementReport lastReport;
+
     public ExtendedCoverageSelector(AutomaticBuilder automaticBuilder, UserInput configuration) {
         super(automaticBuilder, configuration);
         this.coverageImprovementPerAmplifiedMethod = new HashMap<>();
         this.fullCoveragePerAmplifiedMethod = new HashMap<>();
+        EntryPoint.coverageDetail = ParserOptions.CoverageTransformerDetail.METHOD_DETAIL;
+    }
+
+    public ExtendedCoverageSelector(AutomaticBuilder automaticBuilder, UserInput configuration, CtType<?> testClass) {
+        this(automaticBuilder, configuration);
+        this.currentClassTestToBeAmplified = testClass;
     }
 
     @Override
@@ -65,7 +77,10 @@ public class ExtendedCoverageSelector extends TakeAllSelector {
                     .getCoverageOf(ctMethod.getParent(CtClass.class).getQualifiedName() + "#" + ctMethod.getSimpleName()));
 
             if (newCoverage.isBetterThan(this.cumulativeAmplifiedCoverage)) {
-                //note: we still explain the improvement to the coverage before amplification. Maybe we should change?
+                // Note: we still explain to users that the coverage improves compared to the initial coverage, even
+                // though we compare to the cumulative up top (to not have overlapping proposed test cases)
+                // Should we adapt the coverage improvement to also be calculated against the cumulative coverage?
+                // !!! Changing this will break the current ExtendedCoverageMinimizer
                 CoverageImprovement coverageImprovement = newCoverage.coverageImprovementOver(this.initialCoverage);
                 DSpotUtils.addComment(ctMethod, coverageImprovement.toString(), CtComment.CommentType.BLOCK, CommentEnum.Coverage);
                 methodsKept.add(ctMethod);
@@ -79,15 +94,15 @@ public class ExtendedCoverageSelector extends TakeAllSelector {
         return methodsKept;
     }
 
-    private CoveragePerTestMethod computeCoverageForGivenTestMethods(List<CtMethod<?>> testsToBeAmplified) {
+    public CoveragePerTestMethod computeCoverageForGivenTestMethods(List<CtMethod<?>> testsToBeAmplified) {
         final String[] methodNames = testsToBeAmplified.stream().map(CtNamedElement::getSimpleName)
                 .toArray(String[]::new);
         try {
             return EntryPoint.runCoveragePerTestMethods(
-                            this.classpath + AmplificationHelper.PATH_SEPARATOR + this.targetClasses,
-                            this.targetClasses,
-                            this.currentClassTestToBeAmplified.getQualifiedName(),
-                            methodNames);
+                    this.classpath + AmplificationHelper.PATH_SEPARATOR + this.targetClasses,
+                    this.targetClasses,
+                    this.currentClassTestToBeAmplified.getQualifiedName(),
+                    methodNames);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -95,8 +110,13 @@ public class ExtendedCoverageSelector extends TakeAllSelector {
 
     @Override
     public TestSelectorElementReport report() {
+        if (currentClassTestToBeAmplified == null) {
+            return lastReport;
+        }
         final String report = "Amplification results with " + this.selectedAmplifiedTest.size() + " new tests.";
-        return new TestSelectorElementReportImpl(report, jsonReport(), Collections.emptyList(), "");
+        lastReport = new TestSelectorElementReportImpl(report, jsonReport(), Collections.emptyList(), "");
+        reset();
+        return lastReport;
     }
 
     private TestClassJSON jsonReport() {
@@ -106,10 +126,11 @@ public class ExtendedCoverageSelector extends TakeAllSelector {
                 this.cumulativeAmplifiedCoverage);
         this.selectedAmplifiedTest.stream()
                 .map(ctMethod -> new TestCaseJSON(ctMethod.getSimpleName(),
-                    Counter.getAssertionOfSinceOrigin(ctMethod),
-                    Counter.getInputOfSinceOrigin(ctMethod),
-                    this.coverageImprovementPerAmplifiedMethod.get(ctMethod),
-                    this.fullCoveragePerAmplifiedMethod.get(ctMethod)))
+                        Counter.getAssertionOfSinceOrigin(ctMethod),
+                        Counter.getInputOfSinceOrigin(ctMethod),
+                        this.coverageImprovementPerAmplifiedMethod.get(ctMethod),
+                        this.fullCoveragePerAmplifiedMethod.get(ctMethod),
+                        AmplificationHelper.getOriginalTestMethod(ctMethod).getSimpleName()))
                 .forEach(testClassJSON::addTestCase);
 
         return testClassJSON;

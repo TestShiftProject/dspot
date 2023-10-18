@@ -51,8 +51,10 @@ public class TakeAllSelector extends AbstractTestSelector {
 	@Override
 	public TestSelectorElementReport report() {
 		final String report = "Amplification results with " + this.selectedAmplifiedTest.size() + " new tests.";
+		TestSelectorElementReportImpl testSelectorElementReport =
+				new TestSelectorElementReportImpl(report, new TestClassJSON(), Collections.emptyList(), "");
 		reset();
-		return new TestSelectorElementReportImpl(report, new TestClassJSON(), Collections.emptyList(), "");
+		return testSelectorElementReport;
 	}
 
 	@Override
@@ -62,6 +64,7 @@ public class TakeAllSelector extends AbstractTestSelector {
 
 	protected void reset() {
 		this.currentClassTestToBeAmplified = null;
+		this.selectedAmplifiedTest.clear();
 	}
 
 }

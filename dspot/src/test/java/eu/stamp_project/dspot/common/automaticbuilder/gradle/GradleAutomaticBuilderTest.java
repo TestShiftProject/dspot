@@ -9,7 +9,6 @@ import eu.stamp_project.dspot.selector.pitmutantscoreselector.PitXMLResultParser
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Daniele Gagliardi
@@ -104,8 +100,8 @@ public class GradleAutomaticBuilderTest {
         //UserInput.get().setDescartesMode(false);
         sut.runPit();
         List<? extends AbstractPitResult> pitResults = parser.parseAndDelete("src/test/resources/test-projects/" + sut.getOutputDirectoryPit());
-        assertTrue("PIT results shouldn't be null", pitResults != null);
-        assertTrue("PIT results shouldn't be empty", !pitResults.isEmpty());
+        assertNotNull("PIT results shouldn't be null", pitResults);
+        assertFalse("PIT results shouldn't be empty", pitResults.isEmpty());
         LOGGER.info("Gradle Automatic Builder runPit() test complete when no test class is specified.");
     }
 
@@ -115,10 +111,10 @@ public class GradleAutomaticBuilderTest {
         LOGGER.info("Starting Gradle Automatic Builder runPit() test when a test class is specified...");
 
         sut.runPit(launcher.getFactory().Class().get("example.TestSuiteExample"));
-        List<? extends AbstractPitResult> pitResults = parser.parseAndDelete("src/test/resources/test-projects/"+ sut.getOutputDirectoryPit());
+        List<? extends AbstractPitResult> pitResults = parser.parseAndDelete("src/test/resources/test-projects/" + sut.getOutputDirectoryPit());
 
-        assertTrue("PIT results shouldn't be null", pitResults != null);
-        assertTrue("PIT results shouldn't be empty", !pitResults.isEmpty());
+        assertNotNull("PIT results shouldn't be null", pitResults);
+        assertFalse("PIT results shouldn't be empty", pitResults.isEmpty());
 
         LOGGER.info("Gradle Automatic Builder runPit() test complete when a test class is specified.");
     }

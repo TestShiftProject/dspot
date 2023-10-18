@@ -53,7 +53,7 @@ public class Output {
     }
 
     public CtType<?> output(CtType<?> testClassToBeAmplified, List<CtMethod<?>> amplifiedTestMethods) {
-        final CtType clone = testClassToBeAmplified.clone();
+        final CtType<?> clone = testClassToBeAmplified.clone();
         testClassToBeAmplified.getPackage().addType(clone);
         final CtType<?> amplification = AmplificationHelper.createAmplifiedTest(amplifiedTestMethods, clone);
         final File outputDirectory = new File(this.outputPathDirectory);
@@ -64,8 +64,10 @@ public class Output {
                             amplification.getQualifiedName() + ".java",
                             amplifiedTestMethods.size(),
                             this.outputPathDirectory
-                    )
+                    ),
+                    true
             );
+            DSpotState.GLOBAL_REPORT.outputForClass(this.outputPathDirectory, testClassToBeAmplified);
             // we try to compile the newly generated amplified test class (.java)
             // if this fail, we re-print the java test class without imports
             DSpotUtils.printAndCompileToCheck(amplification, outputDirectory, collector);
@@ -96,7 +98,8 @@ public class Output {
                         clone.getQualifiedName() + ".java",
                         clone.getMethods().size(),
                         this.outputPathDirectory + "/original/"
-                )
+                ),
+                false
         );
         DSpotUtils.printCtTypeToGivenDirectory(clone, outputDirectory, true);
     }

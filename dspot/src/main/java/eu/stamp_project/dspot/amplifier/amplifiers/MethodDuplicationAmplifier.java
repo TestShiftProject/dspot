@@ -1,12 +1,13 @@
 package eu.stamp_project.dspot.amplifier.amplifiers;
 
-import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
-import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
-import eu.stamp_project.dspot.common.test_framework.TestFramework;
 import eu.stamp_project.dspot.amplifier.amplifiers.utils.AmplificationChecker;
+import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
 import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
 import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
 import eu.stamp_project.dspot.common.miscellaneous.Counter;
+import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
+import eu.stamp_project.dspot.common.report.output.amplifiers.MethodDuplicationAmplifierReport;
+import eu.stamp_project.dspot.common.test_framework.TestFramework;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -57,6 +58,7 @@ public class MethodDuplicationAmplifier implements Amplifier {
                 CtComment.CommentType.INLINE,
                 CommentEnum.Amplifier);
         final CtMethod<?> clone = CloneHelper.cloneTestMethodForAmp(method, "_add");
+        DSpotUtils.reportModification(method, clone, new MethodDuplicationAmplifierReport(invocation.toString()));
         AmplifierHelper.getParent(invocationToBeInserted).getStatements().remove(invocationToBeInserted);
         Counter.updateInputOf(clone, 1);
         return clone;

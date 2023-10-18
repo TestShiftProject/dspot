@@ -47,6 +47,11 @@ public class TestSelectorReportImpl implements TestSelectorReport {
     }
 
     @Override
+    public void outputForClass(String outputDirectory, CtType<?> testClassToPrint) {
+        this.testSelectorElementReportPerTestClass.get(testClassToPrint).output(testClassToPrint, outputDirectory);
+    }
+
+    @Override
     public void reset() {
         this.testSelectorElementReportPerTestClass.clear();
     }

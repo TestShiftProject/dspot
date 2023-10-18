@@ -2,10 +2,7 @@ package eu.stamp_project.dspot.amplifier.input_ampl_distributor;
 
 import eu.stamp_project.dspot.AbstractTestOnSample;
 import eu.stamp_project.dspot.amplifier.SimpleInputAmplDistributor;
-import eu.stamp_project.dspot.amplifier.amplifiers.IterationDecoratorAmplifier;
-import eu.stamp_project.dspot.amplifier.amplifiers.MethodAdderOnExistingObjectsAmplifier;
-import eu.stamp_project.dspot.amplifier.amplifiers.NumberLiteralAmplifier;
-import eu.stamp_project.dspot.amplifier.amplifiers.ReturnValueAmplifier;
+import eu.stamp_project.dspot.amplifier.amplifiers.*;
 import eu.stamp_project.dspot.common.test_framework.TestFramework;
 import org.junit.Test;
 import spoon.reflect.declaration.CtClass;

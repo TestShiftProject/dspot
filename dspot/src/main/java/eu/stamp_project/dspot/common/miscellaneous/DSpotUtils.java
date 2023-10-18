@@ -6,6 +6,7 @@ import eu.stamp_project.dspot.common.configuration.DSpotState;
 import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
 import eu.stamp_project.dspot.common.report.error.Error;
 import eu.stamp_project.dspot.common.report.error.ErrorEnum;
+import eu.stamp_project.dspot.common.report.output.AmplifierReport;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +90,7 @@ public class DSpotUtils {
             processor.createJavaFile(type);
             env.setAutoImports(false);
         } catch (Exception e) {
+            e.printStackTrace(System.out);
             printCtTypUsingToStringToGivenDirectory(type, directory);
         }
     }
@@ -211,12 +213,20 @@ public class DSpotUtils {
         }
 
         List<CtComment> ampComments = element.getComments().stream()
-                                             .filter(ctComment -> ctComment.getContent().startsWith(suffixOfComment))
-                                             .collect(Collectors.toList());
+                .filter(ctComment -> ctComment.getContent().startsWith(suffixOfComment))
+                .collect(Collectors.toList());
         for (CtComment ampComment : ampComments) {
             element.removeComment(ampComment);
         }
 
+    }
+
+    public static void reportModification(CtMethod<?> testBeforeModification,
+                                          CtMethod<?> testAfterModification, AmplifierReport report) {
+        DSpotState.GLOBAL_REPORT.reportModification(testBeforeModification.getDeclaringType(),
+                testBeforeModification.getSimpleName(),
+                testAfterModification.getSimpleName(),
+                report);
     }
 
     public static final String PATH_TO_DSPOT_DEPENDENCIES = "target/dspot/dependencies/";

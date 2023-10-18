@@ -2,13 +2,17 @@ package eu.stamp_project.dspot.common.miscellaneous;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.reference.CtTypeReference;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * User: Simon
@@ -94,29 +98,47 @@ public class TypeUtils {
             return String.class.isAssignableFrom(type.getActualClass());
         } catch (spoon.support.SpoonClassNotFoundException ignored) {
 
-		} catch (Exception e) {
-		    e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             LOGGER.warn("Error during checkEnum isString on {}", type.toString());
-		}
-		return false;
-	}
+        }
+        return false;
+    }
 
-	/**
-	 * Returns the full Java qualified name of a method
-	 * @param method spoon node of which the qualified name must be build
-	 * @return qualified name
-	 */
-	public static String getQualifiedName (CtMethod method) {
-		StringBuilder qualifiedName = new StringBuilder();
-		if (method!=null) {
-			if (method.getParent(CtClass.class)!=null)  {
-				if (method.getParent(CtPackage.class) != null) {
-					qualifiedName.append(method.getParent(CtPackage.class)).append(".");
-				}
-				qualifiedName.append(method.getParent(CtClass.class).getSimpleName()).append(".");
-			}
-			qualifiedName.append(method.getSimpleName());
-		}
-		return qualifiedName.toString();
-	}
+    /**
+     * Returns the full Java qualified name of a method
+     *
+     * @param method spoon node of which the qualified name must be build
+     * @return qualified name
+     */
+    public static String getQualifiedName(CtMethod method) {
+        StringBuilder qualifiedName = new StringBuilder();
+        if (method != null) {
+            if (method.getParent(CtClass.class) != null) {
+                if (method.getParent(CtPackage.class) != null) {
+                    qualifiedName.append(method.getParent(CtPackage.class)).append(".");
+                }
+                qualifiedName.append(method.getParent(CtClass.class).getSimpleName()).append(".");
+            }
+            qualifiedName.append(method.getSimpleName());
+        }
+        return qualifiedName.toString();
+    }
+
+    /**
+     * @param element the base element
+     * @return the first parent of the searched type that is a CtStatement.
+     * Returns null if no parent exists.
+     */
+    public static CtElement getFirstStatementParent(CtElement element) {
+        CtElement iterator = element.getParent();
+        while (iterator != null) {
+            if (iterator instanceof CtStatement) {
+                return iterator;
+            } else {
+                iterator = iterator.getParent();
+            }
+        }
+        return null;
+    }
 }

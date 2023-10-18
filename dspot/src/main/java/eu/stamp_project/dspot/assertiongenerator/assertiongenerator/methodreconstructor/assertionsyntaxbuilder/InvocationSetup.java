@@ -9,6 +9,7 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.*;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtFieldReference;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -70,6 +71,7 @@ public class InvocationSetup {
     }
 
     private static void addTypeCastIfNeeded(CtExpression<?> variableRead, Object value) {
+        // TODO actually check if a type cast is needed
         if (value instanceof Short) {
             variableRead.addTypeCast(variableRead.getFactory().Type().shortPrimitiveType());
         } else if (value instanceof Integer) {

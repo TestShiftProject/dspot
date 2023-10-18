@@ -123,7 +123,7 @@ public class Translator {
         String fullQualifiedName = invocationAsString.substring(start + 1, end);
         CtType<?> ctType = getCtType(fullQualifiedName, factory);
         // handling inner types
-        while(ctType == null) {
+        while (ctType == null) {
             final int lastIndexOf = fullQualifiedName.lastIndexOf(".");
             fullQualifiedName = fullQualifiedName.substring(0, lastIndexOf) + "$" + fullQualifiedName.substring(lastIndexOf + 1, fullQualifiedName.length());
             ctType = getCtType(fullQualifiedName, factory);

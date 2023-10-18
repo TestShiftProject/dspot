@@ -9,7 +9,15 @@ import java.util.stream.IntStream;
 
 public class MethodCoverage {
 
+    /**
+     * The coverage of each line of the method (as counted by Jacoco)
+     */
     public List<Integer> lineCoverage;
+
+    /**
+     * The method descriptor as provided by Jacoco.
+     * This helps to distinguish overloaded methods with the same name but differnt parameter types.
+     */
     public String methodDescriptor;
 
     public MethodCoverage(List<Integer> lineCoverage, String methodDescriptor) {
@@ -18,10 +26,11 @@ public class MethodCoverage {
     }
 
     /**
-     * calculate 'diff' of the coverage values wrt.
+     * Calculate the 'diff' of the coverage values wrt.
+     *
      * @param that other method coverage
      * @return coverage diff between each of the lines
-     *
+     * <p>
      * Only works for two method coverages from the same method (same length in number of lines)
      */
     public MethodCoverage improvementDiffOver(MethodCoverage that) {
@@ -48,9 +57,16 @@ public class MethodCoverage {
             if (instructionImprovement <= 0) {
                 continue;
             }
-            map.put(index,instructionImprovement);
+            map.put(index, instructionImprovement);
         }
         return map;
+    }
+
+    /**
+     * @return the total number of covered instructions.
+     */
+    public int sum() {
+        return lineCoverage.stream().mapToInt(Integer::intValue).sum();
     }
 
     @Override

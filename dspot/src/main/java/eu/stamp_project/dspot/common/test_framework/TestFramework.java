@@ -1,5 +1,8 @@
 package eu.stamp_project.dspot.common.test_framework;
 
+import eu.stamp_project.dspot.common.configuration.DSpotCache;
+import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
+import eu.stamp_project.dspot.common.miscellaneous.TypeUtils;
 import eu.stamp_project.dspot.common.test_framework.assertions.AssertEnum;
 import eu.stamp_project.dspot.common.test_framework.implementations.AssertJTestFramework;
 import eu.stamp_project.dspot.common.test_framework.implementations.GoogleTruthTestFramework;
@@ -7,9 +10,6 @@ import eu.stamp_project.dspot.common.test_framework.implementations.junit.JUnit3
 import eu.stamp_project.dspot.common.test_framework.implementations.junit.JUnit4Support;
 import eu.stamp_project.dspot.common.test_framework.implementations.junit.JUnit5Support;
 import eu.stamp_project.testrunner.runner.Failure;
-import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
-import eu.stamp_project.dspot.common.configuration.DSpotCache;
-import eu.stamp_project.dspot.common.miscellaneous.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spoon.reflect.code.CtExpression;
@@ -266,5 +266,10 @@ public class TestFramework implements TestFrameworkSupport {
     @Override
     public void generateAfterClassToSaveObservations(CtType<?> testClass, List<CtMethod<?>> testsToRun) {
         this.getTestFramework(testsToRun.get(0)).generateAfterClassToSaveObservations(testClass, testsToRun);
+    }
+
+    @Override
+    public AssertEnum classifyAssertMethod(String assertMethodName, CtMethod<?> testMethod) {
+        return this.getTestFramework(testMethod).classifyAssertMethod(assertMethodName, testMethod);
     }
 }

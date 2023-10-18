@@ -1,23 +1,24 @@
 package eu.stamp_project.dspot.common.configuration;
 
+import eu.stamp_project.dspot.amplifier.amplifiers.Amplifier;
 import eu.stamp_project.dspot.amplifier.amplifiers.utils.RandomHelper;
+import eu.stamp_project.dspot.assertiongenerator.AssertionGenerator;
+import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.AssertionGeneratorUtils;
+import eu.stamp_project.dspot.common.automaticbuilder.AutomaticBuilder;
+import eu.stamp_project.dspot.common.collector.CollectorFactory;
+import eu.stamp_project.dspot.common.collector.smtp.EmailSender;
+import eu.stamp_project.dspot.common.compilation.DSpotCompiler;
+import eu.stamp_project.dspot.common.compilation.TestCompiler;
+import eu.stamp_project.dspot.common.configuration.check.Checker;
+import eu.stamp_project.dspot.common.configuration.options.AmplifierEnum;
+import eu.stamp_project.dspot.common.configuration.test_finder.TestFinder;
 import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
 import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
 import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
-import eu.stamp_project.dspot.common.automaticbuilder.AutomaticBuilder;
-import eu.stamp_project.dspot.amplifier.amplifiers.Amplifier;
-import eu.stamp_project.dspot.assertiongenerator.AssertionGenerator;
-import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.AssertionGeneratorUtils;
-import eu.stamp_project.dspot.common.test_framework.TestFramework;
-import eu.stamp_project.dspot.common.collector.CollectorFactory;
-import eu.stamp_project.dspot.common.compilation.DSpotCompiler;
-import eu.stamp_project.dspot.common.compilation.TestCompiler;
-import eu.stamp_project.dspot.common.configuration.options.AmplifierEnum;
-import eu.stamp_project.dspot.common.configuration.check.Checker;
 import eu.stamp_project.dspot.common.report.output.Output;
-import eu.stamp_project.dspot.common.collector.smtp.EmailSender;
-import eu.stamp_project.dspot.common.configuration.test_finder.TestFinder;
+import eu.stamp_project.dspot.common.test_framework.TestFramework;
 import org.apache.commons.io.FileUtils;
+import spoon.reflect.factory.Factory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,9 @@ public class InitializeDSpot {
                 userInput,
                 dependencies
         ));
-        userInput.setFactory(DSpotState.getCompiler().getLauncher().getFactory());
+        Factory factory = DSpotState.getCompiler().getLauncher().getFactory();
+        factory.getEnvironment().setAutoImports(true);
+        userInput.setFactory(factory);
         initHelpers(userInput);
         DSpotState.setTestCompiler(new TestCompiler(
                 userInput.getNumberParallelExecutionProcessors(),
@@ -106,7 +109,6 @@ public class InitializeDSpot {
         DSpotState.setCollectData(true);
         DSpotState.setDelta(userInput.getDelta());
         DSpotState.setNbIteration(userInput.getNbIteration());
-        DSpotState.verbose = userInput.isVerbose();
     }
 
     public void initHelpers(UserInput configuration) {

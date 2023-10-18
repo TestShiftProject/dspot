@@ -4,6 +4,7 @@ import eu.stamp_project.dspot.common.automaticbuilder.AutomaticBuilder;
 import eu.stamp_project.dspot.DSpot;
 import eu.stamp_project.dspot.assertiongenerator.AssertionGenerator;
 import eu.stamp_project.dspot.amplifier.InputAmplDistributor;
+import eu.stamp_project.dspot.common.report.output.ModificationReportImpl;
 import eu.stamp_project.dspot.selector.TestSelector;
 import eu.stamp_project.dspot.common.collector.Collector;
 import eu.stamp_project.dspot.common.compilation.DSpotCompiler;
@@ -46,7 +47,7 @@ public class DSpotState {
     private AssertionGenerator assertionGenerator;
     private TestCompiler testCompiler;
     public static final GlobalReport GLOBAL_REPORT =
-            new GlobalReport(new OutputReportImpl(), new ErrorReportImpl(), new TestSelectorReportImpl());
+            new GlobalReport(new OutputReportImpl(), new ErrorReportImpl(), new TestSelectorReportImpl(), new ModificationReportImpl());
     public static boolean verbose = false;
     private final Logger LOGGER = LoggerFactory.getLogger(DSpot.class);
     private double delta;

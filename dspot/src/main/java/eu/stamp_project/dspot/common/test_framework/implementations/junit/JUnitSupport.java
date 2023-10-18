@@ -1,12 +1,12 @@
 package eu.stamp_project.dspot.common.test_framework.implementations.junit;
 
-import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.testwithloggenerator.objectlogsyntaxbuilder_constructs.ObjectLog;
 import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.AssertionGeneratorUtils;
+import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.testwithloggenerator.objectlogsyntaxbuilder_constructs.ObjectLog;
 import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
+import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
 import eu.stamp_project.dspot.common.test_framework.AbstractTestFramework;
 import eu.stamp_project.dspot.common.test_framework.assertions.AssertEnum;
 import eu.stamp_project.testrunner.runner.Failure;
-import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.*;
 import spoon.reflect.factory.Factory;
@@ -242,5 +242,10 @@ public abstract class JUnitSupport extends AbstractTestFramework {
         afterClassMethod.addAnnotation(annotation);
         afterClassMethod.setBody(factory.createBlock());
         return afterClassMethod;
+    }
+
+    @Override
+    public AssertEnum classifyAssertMethod(String assertMethodName, CtMethod<?> testMethod) {
+        return AssertEnum.fromStringAccordingToClass(JUnitSupport.class, assertMethodName);
     }
 }

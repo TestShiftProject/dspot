@@ -6,6 +6,8 @@ import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
 import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
 import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
 import eu.stamp_project.dspot.common.test_framework.assertions.AssertEnum;
+import eu.stamp_project.dspot.common.test_framework.implementations.GoogleTruthTestFramework;
+import eu.stamp_project.dspot.common.test_framework.implementations.junit.JUnitSupport;
 import eu.stamp_project.testrunner.runner.Failure;
 import org.junit.Before;
 import org.junit.Test;
@@ -243,5 +245,15 @@ public class TestFrameworkTest extends AbstractTestOnSample {
                 )
         );
         assertEquals(ctInvocation.toString(), nameOfExpectedAssertClass + "assertEquals(this, this)", ctInvocation.toString());
+    }
+
+    @Test
+    public void fromMethodNameToAssertEnum() {
+        AssertEnum assertTrueJUnit = AssertEnum.fromStringAccordingToClass(JUnitSupport.class, "assertTrue");
+        assertEquals(AssertEnum.ASSERT_TRUE, assertTrueJUnit);
+
+        AssertEnum assertNotEqualsGoogleTruth = AssertEnum.fromStringAccordingToClass(GoogleTruthTestFramework.class,
+                "isNotEqualTo");
+        assertEquals(AssertEnum.ASSERT_NOT_EQUALS, assertNotEqualsGoogleTruth);
     }
 }

@@ -70,7 +70,10 @@ public enum ErrorEnum {
             "external files, etc. You can use --excluded-classes and --excluded-test-cases"
             + AmplificationHelper.LINE_SEPARATOR +
             " to exclude respectively specific test classes ans test cases."
-    );
+    ),
+
+    // Prettifier
+    ERROR_PATH_TO_AMPLIFIED_TEST_FILE("amplified test class", "--path-to-amplified-test-class");
 
     private String message;
 

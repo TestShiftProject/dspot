@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 /**
  * created by Benjamin DANGLOT
@@ -76,6 +76,6 @@ public class GoogleTruthTest extends AbstractTestOnSample {
         assertEquals(ctInvocation.toString(), nameOfExpectedAssertClass + "assertThat(this).isEqualTo(this)", ctInvocation.toString());
 
         TestFramework.get().generateAfterClassToSaveObservations(testClass, Collections.singletonList(testMethod));
-        assertTrue(!testClass.getMethodsByName("afterClass").isEmpty());
+        assertFalse(testClass.getMethodsByName("afterClass").isEmpty());
     }
 }

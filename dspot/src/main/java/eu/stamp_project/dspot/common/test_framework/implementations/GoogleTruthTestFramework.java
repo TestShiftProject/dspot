@@ -2,7 +2,6 @@ package eu.stamp_project.dspot.common.test_framework.implementations;
 
 import eu.stamp_project.dspot.common.test_framework.AbstractTestFrameworkDecorator;
 import eu.stamp_project.dspot.common.test_framework.assertions.AssertEnum;
-
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtElement;
@@ -72,5 +71,10 @@ public class GoogleTruthTestFramework extends AbstractTestFrameworkDecorator {
     @Override
     public boolean isIgnored(CtElement candidate) {
         return false;
+    }
+
+    @Override
+    public AssertEnum classifyAssertMethod(String assertMethodName, CtMethod<?> testMethod) {
+        return AssertEnum.fromStringAccordingToClass(GoogleTruthTestFramework.class, assertMethodName);
     }
 }

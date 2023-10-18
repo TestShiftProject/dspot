@@ -51,4 +51,9 @@ public class AssertJTestFramework extends AbstractTestFramework {
     public boolean isIgnored(CtElement candidate) {
         return false;
     }
+
+    @Override
+    public AssertEnum classifyAssertMethod(String assertMethodName, CtMethod<?> testMethod) {
+        throw new RuntimeException("Unsupported Operation");
+    }
 }

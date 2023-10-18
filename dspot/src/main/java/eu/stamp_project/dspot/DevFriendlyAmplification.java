@@ -1,6 +1,5 @@
 package eu.stamp_project.dspot;
 
-import eu.stamp_project.dspot.common.configuration.AmplificationSetup;
 import eu.stamp_project.dspot.common.configuration.DSpotState;
 import eu.stamp_project.dspot.common.configuration.TestTuple;
 import eu.stamp_project.dspot.common.miscellaneous.AmplificationException;
@@ -21,15 +20,13 @@ public class DevFriendlyAmplification {
 
     private final DSpot dSpot;
     private final DSpotState dSpotState;
-    private final AmplificationSetup setup;
     private final Logger LOGGER;
     private final GlobalReport GLOBAL_REPORT;
 
-    public DevFriendlyAmplification(DSpot dSpot, DSpotState dSpotState, AmplificationSetup setup, Logger LOGGER,
+    public DevFriendlyAmplification(DSpot dSpot, DSpotState dSpotState, Logger LOGGER,
                                     GlobalReport GLOBAL_REPORT) {
         this.dSpot = dSpot;
         this.dSpotState = dSpotState;
-        this.setup = setup;
         this.LOGGER = LOGGER;
         this.GLOBAL_REPORT = GLOBAL_REPORT;
     }
@@ -44,9 +41,9 @@ public class DevFriendlyAmplification {
     public List<CtMethod<?>> devFriendlyAmplification(CtType<?> testClassToBeAmplified,
                                                       List<CtMethod<?>> testMethodsToBeAmplified) {
 
+        // first we setup the selector so it can compute the complete coverage of the whole existing test suite
         final List<CtMethod<?>> selectedToBeAmplified = dSpot
-                .setupSelector(testClassToBeAmplified,
-                        dSpotState.getTestFinder().findTestMethods(testClassToBeAmplified,Collections.emptyList()));
+                .setupSelector(testClassToBeAmplified, testMethodsToBeAmplified);
 
         // selectedToBeAmplified with all test class methods -> keep only ones matching testMethodsToBeAmplified
         final List<CtMethod<?>> methodsToAmplify =
@@ -106,11 +103,8 @@ public class DevFriendlyAmplification {
             classWithTestMethods = testTuple.testClassToBeAmplified;
 
             // Amplify input
-            List<CtMethod<?>> selectedForInputAmplification = setup
-                    .fullSelectorSetup(classWithTestMethods, testTuple.testMethodsToBeAmplified);
-
             List<CtMethod<?>> inputAmplifiedTests = dSpotState.getInputAmplDistributor()
-                    .inputAmplify(selectedForInputAmplification, 0);
+                    .inputAmplify(testTuple.testMethodsToBeAmplified, 0);
 
             // Add new assertions
             amplifiedTests = dSpotState.getAssertionGenerator()
@@ -120,14 +114,31 @@ public class DevFriendlyAmplification {
             GLOBAL_REPORT.addError(new Error(ERROR_ASSERT_AMPLIFICATION, e));
             return Collections.emptyList();
         }
+        if (amplifiedTests.size() >= 1000) {
+            // executing too many tests over the command line fails because the argument list is too long
+            // that is why we split in smaller chunks that we execute separately
 
-        return selectPassingAndImprovingTests(amplifiedTests,classWithTestMethods,2);
+            List<CtMethod<?>> accumulateSelectedTests = new ArrayList<>();
+            int rounds = amplifiedTests.size() % 1000 + 1;
+            LOGGER.info("Too many tests to run at once. Dividing {} tests into {} rounds", amplifiedTests.size(),
+                    rounds);
+            for (int i = 0; i <= rounds; i++) {
+                List<CtMethod<?>> roundTests = amplifiedTests.subList(i, Math.min((i + 1) * 1000,
+                        amplifiedTests.size()));
+                accumulateSelectedTests.addAll(selectPassingAndImprovingTests(roundTests, classWithTestMethods, 2));
+            }
+            return accumulateSelectedTests;
+
+        } else {
+            return selectPassingAndImprovingTests(amplifiedTests,classWithTestMethods,2);
+        }
     }
 
     private List<CtMethod<?>> selectPassingAndImprovingTests(List<CtMethod<?>> amplifiedTests,
                                                              CtType<?> classWithTestMethods,
                                                              int path) {
         if (amplifiedTests.isEmpty()) {
+            LOGGER.info("Dev friendly amplification, path {}: 0 test method(s) passed to improvement selection.", path);
             return Collections.emptyList();
         }
         final List<CtMethod<?>> amplifiedPassingTests = dSpotState.getTestCompiler()

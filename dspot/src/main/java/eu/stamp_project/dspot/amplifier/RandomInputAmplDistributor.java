@@ -1,18 +1,18 @@
 package eu.stamp_project.dspot.amplifier;
 
+import eu.stamp_project.dspot.amplifier.amplifiers.Amplifier;
+import eu.stamp_project.dspot.common.configuration.DSpotState;
+import eu.stamp_project.dspot.common.configuration.UserInput;
+import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import spoon.reflect.declaration.CtMethod;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import eu.stamp_project.dspot.amplifier.amplifiers.Amplifier;
-import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
-import eu.stamp_project.dspot.common.configuration.UserInput;
-import spoon.reflect.declaration.CtMethod;
 
 /**
  * Created by Benjamin DANGLOT, Yosu Gorroñogoitia
@@ -52,7 +52,9 @@ public class RandomInputAmplDistributor extends AbstractInputAmplDistributor {
         List<CtMethod<?>> inputAmplifiedTests = testMethods.parallelStream()
                 .flatMap(test -> {
                     final Stream<CtMethod<?>> inputAmplifiedTestMethods = inputAmplifyTest(test, i);
-                    DSpotUtils.printProgress(testMethods.indexOf(test), testMethods.size());
+                    if (DSpotState.verbose) {
+                        DSpotUtils.printProgress(testMethods.indexOf(test), testMethods.size());
+                    }
                     return inputAmplifiedTestMethods;
                 }).collect(Collectors.toList());
         LOGGER.info("{} new tests generated", inputAmplifiedTests.size());

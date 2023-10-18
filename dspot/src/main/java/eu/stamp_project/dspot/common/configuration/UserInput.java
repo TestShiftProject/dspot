@@ -152,7 +152,7 @@ public class UserInput {
             description = "specify a path folder for the output." +
                     " Default value: ${DEFAULT-VALUE}"
     )
-    private String outputDirectory = "target/dspot/output/";
+    private String outputDirectory = "target" + File.separator + "dspot" + File.separator + "output" + File.separator;
 
     @CommandLine.Option(
             names = "--only-input-amplification",

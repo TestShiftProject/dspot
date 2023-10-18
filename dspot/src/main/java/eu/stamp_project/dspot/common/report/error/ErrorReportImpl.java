@@ -1,9 +1,9 @@
 package eu.stamp_project.dspot.common.report.error;
 
 import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spoon.reflect.declaration.CtType;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -71,6 +71,15 @@ public class ErrorReportImpl implements ErrorReport {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void outputForClass(String outputDirectory, CtType<?> testClass) {
+        if (hasError()) {
+            // output errors already
+            this.output(outputDirectory);
+        }
+        // we do nothing to not fill up the log unnecessarily with repeated "everything is okay" messages
     }
 
     protected void displayAndAppendErrors(List<Error> currentErrors, StringBuilder report, String intro) {

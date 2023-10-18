@@ -1,15 +1,16 @@
 package eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor;
 
+import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.TestWithLogGenerator;
 import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.testwithloggenerator.objectlogsyntaxbuilder_constructs.ObjectLog;
 import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.testwithloggenerator.objectlogsyntaxbuilder_constructs.objectlog.Observation;
-import eu.stamp_project.dspot.common.miscellaneous.AmplificationException;
-import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.TestWithLogGenerator;
-import eu.stamp_project.dspot.common.test_framework.TestFramework;
-import eu.stamp_project.testrunner.listener.TestResult;
-import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
-import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
 import eu.stamp_project.dspot.common.compilation.DSpotCompiler;
 import eu.stamp_project.dspot.common.compilation.TestCompiler;
+import eu.stamp_project.dspot.common.configuration.DSpotState;
+import eu.stamp_project.dspot.common.miscellaneous.AmplificationException;
+import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
+import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
+import eu.stamp_project.dspot.common.test_framework.TestFramework;
+import eu.stamp_project.testrunner.listener.TestResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spoon.reflect.code.CtLocalVariable;
@@ -83,7 +84,9 @@ public class Observer {
     private List<CtMethod<?>> addLogs(List<CtMethod<?>> testCases) throws AmplificationException{
         List<CtMethod<?>> testCasesWithLogs = testCases.stream()
                 .map(ctMethod -> {
-                            DSpotUtils.printProgress(testCases.indexOf(ctMethod), testCases.size());
+                            if (DSpotState.verbose) {
+                                DSpotUtils.printProgress(testCases.indexOf(ctMethod), testCases.size());
+                            }
                             return TestWithLogGenerator.createTestWithLog(
                                     ctMethod,
                                     this.originalClass.getPackage().getQualifiedName(),

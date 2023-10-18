@@ -59,12 +59,19 @@ public class ExtendedCoverage {
                 }
             });
             if (!classCoverageMap.methodCoverageMap.isEmpty()) {
-                projectCoverageMap.addClassCoverage(className,classCoverageMap);
+                projectCoverageMap.addClassCoverage(className, classCoverageMap);
             }
         });
         return projectCoverageMap;
     }
 
+    /**
+     * Returns true, if the ExtendedCoverage (this) covers more instructions on any line compared to the given
+     * parameter (that)
+     *
+     * @param that the base coverage to compare to.
+     * @return whether there is any line where there are more instructions covered.
+     */
     public boolean isBetterThan(ExtendedCoverage that) {
         if (that == null) {
             return true;
@@ -75,6 +82,11 @@ public class ExtendedCoverage {
         return !instructionDiff.classCoverageMaps.isEmpty();
     }
 
+    /**
+     * Add the given coverage improvement.
+     *
+     * @param toAdd
+     */
     public void accumulate(ExtendedCoverage toAdd) {
         this.instructionsProjectCoverageMap = this.instructionsProjectCoverageMap.accumulate(
                 toAdd.instructionsProjectCoverageMap);

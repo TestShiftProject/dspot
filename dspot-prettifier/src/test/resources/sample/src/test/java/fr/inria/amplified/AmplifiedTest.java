@@ -1,5 +1,7 @@
 package fr.inria.amplified;
 
+import eu.stamp_project.App;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -30,5 +32,11 @@ public class AmplifiedTest {
         Integer __DSPOT_1 = 5;
         assertEquals(5, __DSPOT_1.intValue());
         assertEquals(5, __DSPOT_1.intValue());
+    }
+
+    @Test
+    public void amplifiedTestWithOldVariable() throws Exception {
+        int testingAnInt = 5;
+        assertEquals(5, testingAnInt);
     }
 }

@@ -1,9 +1,11 @@
 package eu.stamp_project.dspot.assertiongenerator.assertiongenerator;
 
-import eu.stamp_project.dspot.common.test_framework.TestFramework;
-import eu.stamp_project.testrunner.runner.Failure;
 import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
 import eu.stamp_project.dspot.common.miscellaneous.Counter;
+import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
+import eu.stamp_project.dspot.common.report.output.assertiongenerator.ExceptionAssertionReport;
+import eu.stamp_project.dspot.common.test_framework.TestFramework;
+import eu.stamp_project.testrunner.runner.Failure;
 import spoon.reflect.declaration.CtMethod;
 
 import java.util.Arrays;
@@ -48,6 +50,7 @@ public class TryCatchFailGenerator {
             return null;
         }
         cloneMethodTest = TestFramework.get().generateExpectedExceptionsBlock(cloneMethodTest, failure, this.numberOfFail);
+        DSpotUtils.reportModification(test, cloneMethodTest, new ExceptionAssertionReport(failure.fullQualifiedNameOfException));
         Counter.updateAssertionOf(cloneMethodTest, 1);
         return cloneMethodTest;
     }

@@ -1,12 +1,13 @@
 package eu.stamp_project.prettifier;
 
 import eu.stamp_project.dspot.common.test_framework.TestFramework;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spoon.Launcher;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * created by Benjamin DANGLOT
@@ -15,13 +16,15 @@ import static org.junit.Assert.assertEquals;
  */
 public class RedundantCastRemoverTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RedundantCastRemoverTest.class);
+
     @Test
     public void test() {
 
         /*
-            This test that we can remove some redundant cast.
+            This tests that we can remove some redundant cast.
 
-            The last statement should keeps its cast
+            The last statement should keep its cast
          */
 
         Launcher launcher = new Launcher();
@@ -36,9 +39,7 @@ public class RedundantCastRemoverTest {
 
         final RedundantCastRemover redundantCastRemover = new RedundantCastRemover();
         final CtMethod<?> amplifiedTestWithoutRedundantCast = redundantCastRemover.remove(redundantCast);
-        assertEquals(expected,
-                amplifiedTestWithoutRedundantCast.getBody().toString()
-        );
+        Assertions.assertEquals(expected, amplifiedTestWithoutRedundantCast.getBody().toString());
     }
 
     private static final String expected = "{\n" +

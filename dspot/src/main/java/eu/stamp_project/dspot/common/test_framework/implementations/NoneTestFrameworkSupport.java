@@ -63,4 +63,9 @@ public class NoneTestFrameworkSupport implements TestFrameworkSupport {
     public boolean isIgnored(CtElement candidate) {
         return false;
     }
+
+    @Override
+    public AssertEnum classifyAssertMethod(String assertMethodName, CtMethod<?> testMethod) {
+        return null;
+    }
 }

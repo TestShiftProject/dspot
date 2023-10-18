@@ -11,6 +11,6 @@ public interface OutputReport extends Report {
 
     public void addNumberAmplifiedTestMethodsToTotal(int numberOfAmplifiedTestMethods);
 
-    public void addPrintedTestClasses(String line);
+    public void addPrintedTestClasses(String line, boolean printedAmplifiedTestClass);
 
 }

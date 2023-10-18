@@ -17,10 +17,18 @@ public enum AssertEnum {
 
     public String toStringAccordingToClass(Class<?> clazz) {
         try {
-            return (String ) clazz.getDeclaredField(this.name()).get(null);
+            return (String) clazz.getDeclaredField(this.name()).get(null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    public static AssertEnum fromStringAccordingToClass(Class<?> clazz, String methodName) {
+        for (AssertEnum value : AssertEnum.values()) {
+            if (methodName.equals(value.toStringAccordingToClass(clazz))) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

@@ -9,7 +9,6 @@ import eu.stamp_project.dspot.selector.pitmutantscoreselector.PitXMLResultParser
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * Created by Daniele Gagliardi
@@ -71,10 +71,10 @@ public class GradleAutomaticBuilderWithDescartesTest {
     public void runPit_whenAllDescartesMutatorsAreSpecified() throws Exception {
         LOGGER.info("Starting Gradle Automatic Builder runPit() test when a test class is specified...");
         CtClass<Object> testClass = launcher.getFactory().Class().get("example.TestSuiteExample");
-        sut.runPit( testClass);
+        sut.runPit(testClass);
         List<? extends AbstractPitResult> pitResults = parser.parseAndDelete("src/test/resources/test-projects/" + sut.getOutputDirectoryPit());
-        assertTrue("PIT results shouldn't be null", pitResults != null);
-        assertTrue("PIT results shouldn't be empty", !pitResults.isEmpty());
+        assertNotNull("PIT results shouldn't be null", pitResults);
+        assertFalse("PIT results shouldn't be empty", pitResults.isEmpty());
         LOGGER.info("Gradle Automatic Builder runPit() test complete when a test class is specified.");
     }
 

@@ -1,7 +1,7 @@
 package eu.stamp_project.dspot.amplifier;
 
 import eu.stamp_project.dspot.AbstractTestOnSample;
-import eu.stamp_project.dspot.amplifier.amplifiers.TestMethodCallRemover;
+import eu.stamp_project.dspot.amplifier.amplifiers.MethodRemoveAmplifier;
 import org.junit.Test;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
@@ -29,7 +29,7 @@ public class TestMethodCallRemove extends AbstractTestOnSample {
 
         CtClass<Object> testClass = launcher.getFactory().Class().get("fr.inria.mutation.ClassUnderTestTest");
 
-        TestMethodCallRemover methodCallRemove = new TestMethodCallRemover();
+        MethodRemoveAmplifier methodCallRemove = new MethodRemoveAmplifier();
         methodCallRemove.reset(null);
 
         final CtMethod<?> originalMethod = testClass.getMethods().stream().filter(m -> "testAddCall".equals(m.getSimpleName())).findFirst().get();

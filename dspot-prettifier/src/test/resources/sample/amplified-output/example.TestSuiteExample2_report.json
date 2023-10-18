@@ -1,0 +1,220 @@
+{
+  "testCases": [
+    {
+      "name": "test2_mg63_assSep152",
+      "nbAssertionAdded": 1,
+      "nbInputAdded": 1,
+      "coverageImprovement": {
+        "instructionImprovement": {
+          "classCoverageMaps": {
+            "example.Example": {
+              "methodCoverageMap": {
+                "charAt": {
+                  "lineCoverage": [
+                    0,
+                    4,
+                    0,
+                    0,
+                    0,
+                    0,
+                    -7
+                  ],
+                  "methodDescriptor": "(Ljava/lang/String;I)C"
+                }
+              }
+            }
+          }
+        }
+      },
+      "fullCoverage": {
+        "instructionsProjectCoverageMap": {
+          "classCoverageMaps": {
+            "example.Example": {
+              "methodCoverageMap": {
+                "\u003cinit\u003e": {
+                  "lineCoverage": [
+                    2,
+                    0,
+                    2,
+                    5,
+                    1,
+                    0,
+                    3
+                  ],
+                  "methodDescriptor": "()V"
+                },
+                "charAt": {
+                  "lineCoverage": [
+                    2,
+                    4,
+                    0,
+                    4,
+                    4,
+                    0,
+                    0
+                  ],
+                  "methodDescriptor": "(Ljava/lang/String;I)C"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "",
+      "nameOfBaseTestCase": "test2"
+    },
+    {
+      "name": "test2_mg63_assSep1",
+      "nbAssertionAdded": 1,
+      "nbInputAdded": 1,
+      "coverageImprovement": {
+        "instructionImprovement": {
+          "classCoverageMaps": {
+            "example.Example": {
+              "methodCoverageMap": {
+                "charAt": {
+                  "lineCoverage": [
+                    0,
+                    4,
+                    0,
+                    0,
+                    0,
+                    0,
+                    -7
+                  ],
+                  "methodDescriptor": "(Ljava/lang/String;I)C"
+                }
+              }
+            }
+          }
+        }
+      },
+      "fullCoverage": {
+        "instructionsProjectCoverageMap": {
+          "classCoverageMaps": {
+            "example.Example": {
+              "methodCoverageMap": {
+                "\u003cinit\u003e": {
+                  "lineCoverage": [
+                    2,
+                    0,
+                    2,
+                    5,
+                    1,
+                    0,
+                    3
+                  ],
+                  "methodDescriptor": "()V"
+                },
+                "charAt": {
+                  "lineCoverage": [
+                    2,
+                    4,
+                    0,
+                    4,
+                    4,
+                    0,
+                    0
+                  ],
+                  "methodDescriptor": "(Ljava/lang/String;I)C"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "",
+      "nameOfBaseTestCase": "test2"
+    }
+  ],
+  "initialCoverage": {
+    "instructionsProjectCoverageMap": {
+      "classCoverageMaps": {
+        "example.Example": {
+          "methodCoverageMap": {
+            "\u003cinit\u003e": {
+              "lineCoverage": [
+                2,
+                0,
+                2,
+                5,
+                1,
+                0,
+                3
+              ],
+              "methodDescriptor": "()V"
+            },
+            "charAt": {
+              "lineCoverage": [
+                2,
+                0,
+                0,
+                4,
+                4,
+                0,
+                7
+              ],
+              "methodDescriptor": "(Ljava/lang/String;I)C"
+            }
+          }
+        }
+      }
+    }
+  },
+  "amplifiedCoverage": {
+    "instructionImprovement": {
+      "classCoverageMaps": {
+        "example.Example": {
+          "methodCoverageMap": {
+            "charAt": {
+              "lineCoverage": [
+                0,
+                4,
+                0,
+                0,
+                0,
+                0,
+                0
+              ],
+              "methodDescriptor": "(Ljava/lang/String;I)C"
+            }
+          }
+        }
+      }
+    }
+  },
+  "fullCoverageAfterAmplification": {
+    "instructionsProjectCoverageMap": {
+      "classCoverageMaps": {
+        "example.Example": {
+          "methodCoverageMap": {
+            "\u003cinit\u003e": {
+              "lineCoverage": [
+                2,
+                0,
+                2,
+                5,
+                1,
+                0,
+                3
+              ],
+              "methodDescriptor": "()V"
+            },
+            "charAt": {
+              "lineCoverage": [
+                2,
+                4,
+                0,
+                4,
+                4,
+                0,
+                7
+              ],
+              "methodDescriptor": "(Ljava/lang/String;I)C"
+            }
+          }
+        }
+      }
+    }
+  }
+}

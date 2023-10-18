@@ -1,24 +1,17 @@
 package eu.stamp_project.dspot.assertiongenerator.assertiongenerator;
 
-import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.testwithloggenerator.objectlogsyntaxbuilder_constructs.objectlog.Observation;
-import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
-import eu.stamp_project.dspot.common.miscellaneous.AmplificationException;
 import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.AssertionSyntaxBuilder;
 import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.Observer;
-import eu.stamp_project.dspot.common.miscellaneous.AmplificationHelper;
-import eu.stamp_project.dspot.common.miscellaneous.CloneHelper;
-import eu.stamp_project.dspot.common.miscellaneous.Counter;
-import eu.stamp_project.dspot.common.miscellaneous.DSpotUtils;
+import eu.stamp_project.dspot.assertiongenerator.assertiongenerator.methodreconstructor.observer.testwithloggenerator.objectlogsyntaxbuilder_constructs.objectlog.Observation;
 import eu.stamp_project.dspot.common.compilation.DSpotCompiler;
-
 import eu.stamp_project.dspot.common.compilation.TestCompiler;
+import eu.stamp_project.dspot.common.configuration.options.CommentEnum;
+import eu.stamp_project.dspot.common.miscellaneous.*;
+import eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport;
+import eu.stamp_project.dspot.common.report.output.assertiongenerator.ValueAssertionReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spoon.reflect.code.CtBlock;
-import spoon.reflect.code.CtComment;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
@@ -69,14 +62,16 @@ public class MethodReconstructor {
      * Details in {@link Observer#getObservations(CtType, List)}.
      *
      * Details of the assertion generation in {@link #buildTestWithAssert(CtMethod, Map)}.
-     *
      * @param testClass Test class
      * @param testCases Passing test methods
      * @return New tests with new assertions generated from observation points values
      */
     public List<CtMethod<?>> addAssertions(CtType<?> testClass, List<CtMethod<?>> testCases) {
         Map<String, Observation> observations;
+
         if (devFriendlyAmplification) {
+            // We add the test cases before the input amplification, so that we also observe the values there.
+            // Later we only pick values for an assertion when the value is different than in the parent
             testCases.addAll(AmplificationHelper.getFirstParentsIfExist(testCases));
         }
 
@@ -106,8 +101,9 @@ public class MethodReconstructor {
 
     /**
      * Adds new assertions to a test from observation points.
-     *
+     * <p>
      * Details of constructing the syntax for the assertions in {@link AssertionSyntaxBuilder#buildAssert(CtMethod, Set, Map, Double)}.
+     *
      * @param test         Test method
      * @param observations Observation points of the test suite
      * @return Test with new assertions
@@ -138,14 +134,22 @@ public class MethodReconstructor {
                     .anyMatch(testWithAssert.getBody().getLastStatement().toString()::equals)) {
                 continue;
             }
-            numberOfAddedAssertion = goThroughAssertionStatements(assertStatements,id,statements,numberOfAddedAssertion);
+            numberOfAddedAssertion = goThroughAssertionStatements(assertStatements, id, statements,
+                    numberOfAddedAssertion, testWithAssert);
+            for (CtStatement assertStatement : assertStatements) {
+                DSpotUtils.reportModification(test, testWithAssert, new ValueAssertionReport(assertStatement, test));
+            }
+
         }
         Counter.updateAssertionOf(testWithAssert, numberOfAddedAssertion);
-        return decideReturn(testWithAssert,test);
+        return decideReturn(testWithAssert, test);
     }
 
     /**
      * Adds new assertions one by one to generate several new test cases.
+     *
+     * Jumps over assertions that would have been identical in the parent test case (before the amplification
+     * modifications). This helps us generate assertions that are related to the modifications.
      *
      * @param test Original test method
      * @param observations Observation points of the test suite
@@ -174,7 +178,7 @@ public class MethodReconstructor {
                 if (observations.containsKey(parentKey)) {
                     parentAssertStatements = AssertionSyntaxBuilder.buildAssert(parent,
                             observations.get(parentKey).getNotDeterministValues(),
-                            observations.get(parentKey).getObservationValues(),this.delta);
+                            observations.get(parentKey).getObservationValues(), this.delta);
                 }
             }
 
@@ -192,18 +196,28 @@ public class MethodReconstructor {
                 }
 
                 CtMethod<?> testWithAssert = CloneHelper.cloneTestMethodForAmp(clonedNoAmpTest, "_assSep");
-                List<CtStatement> statements = Query.getElements(testWithAssert, new TypeFilter<CtStatement>(CtStatement.class));
+                testWithAssert = decideReturn(testWithAssert, test);
+                if (testWithAssert == null) {
+                    continue;
+                }
 
-                int numberOfAddedAssertion = goThroughAssertionStatements(Collections.singletonList(statement), id, statements, 0);
+                List<CtStatement> statements = Query.getElements(testWithAssert,
+                        new TypeFilter<CtStatement>(CtStatement.class));
+                int numberOfAddedAssertion = goThroughAssertionStatements(Collections.singletonList(statement), id,
+                        statements, 0, test);
                 Counter.updateAssertionOf(testWithAssert, numberOfAddedAssertion);
-                testsToReturn.add(decideReturn(testWithAssert,test));
+
+                DSpotUtils.reportModification(test, testWithAssert, new ValueAssertionReport(statement, test));
+
+                testsToReturn.add(testWithAssert);
             }
         }
         return testsToReturn;
     }
 
-    private int goThroughAssertionStatements(List<CtStatement> assertStatements,String id,
-                                               List<CtStatement> statements, int numberOfAddedAssertion){
+    private int goThroughAssertionStatements(List<CtStatement> assertStatements, String id,
+                                             List<CtStatement> statements, int numberOfAddedAssertion,
+                                             CtMethod<?> test) {
         int line = Integer.parseInt(id.split("__")[1]);
         CtStatement lastStmt = null;
         for (CtStatement assertStatement : assertStatements) {
@@ -219,7 +233,8 @@ public class MethodReconstructor {
                 if (statementToBeAsserted instanceof CtBlock) {
                     break;
                 }
-                decideInvocationReplacement(statementToBeAsserted,id,assertStatement,statements,line,lastStmt);
+                decideInvocationReplacement(statementToBeAsserted, id, assertStatement, statements, line, lastStmt,
+                        test);
                 lastStmt = assertStatement;
                 numberOfAddedAssertion++;
             } catch (Exception e) {
@@ -229,15 +244,15 @@ public class MethodReconstructor {
         return numberOfAddedAssertion;
     }
 
-    private void decideInvocationReplacement(CtStatement statementToBeAsserted,String id,CtStatement assertStatement,
-                                   List<CtStatement> statements,int line,CtStatement lastStmt){
+    private void decideInvocationReplacement(CtStatement statementToBeAsserted, String id, CtStatement assertStatement,
+                                             List<CtStatement> statements, int line, CtStatement lastStmt, CtMethod<?> test) {
 
         /* if the statement to be asserted is a method or constructor call, replace that invocation in the
         assertion with an equivalent local variable */
         if (statementToBeAsserted instanceof CtInvocation &&
                 !AssertionGeneratorUtils.isVoidReturn((CtInvocation) statementToBeAsserted) &&
                 statementToBeAsserted.getParent() instanceof CtBlock) {
-            replaceInvocation(statementToBeAsserted,id,assertStatement,statements,line);
+            replaceInvocation(statementToBeAsserted, id, assertStatement, statements, line, test);
 
             // no creation of local variable is needed, just put the assertion into the test method
         } else {
@@ -245,8 +260,8 @@ public class MethodReconstructor {
         }
     }
 
-    private void replaceInvocation(CtStatement statementToBeAsserted,String id,CtStatement assertStatement,
-                                   List<CtStatement> statements,int line){
+    private void replaceInvocation(CtStatement statementToBeAsserted, String id, CtStatement assertStatement,
+                                   List<CtStatement> statements, int line, CtMethod<?> test) {
 
         // create a new local variable and assign the invocation to it
         CtInvocation invocationToBeReplaced = (CtInvocation) statementToBeAsserted.clone();
@@ -269,6 +284,9 @@ public class MethodReconstructor {
                 "AssertionGenerator: create local variable with return value of invocation",
                 CtComment.CommentType.INLINE,
                 CommentEnum.Amplifier);
+        DSpotUtils.reportModification(test, test,
+                new AddLocalVariableAmplifierReport(localVariable.getSimpleName(),
+                        localVariable.getAssignment().toString(), true));
         localVariable.setParent(statementToBeAsserted.getParent());
         addAtCorrectPlace(id, localVariable, assertStatement, statementToBeAsserted);
         statements.remove(line);
@@ -286,7 +304,7 @@ public class MethodReconstructor {
         }
     }
 
-    private CtMethod decideReturn(CtMethod testWithAssert,CtMethod test){
+    private CtMethod decideReturn(CtMethod testWithAssert, CtMethod test) {
         if (!testWithAssert.equals(test)) {
             return testWithAssert;
         } else {

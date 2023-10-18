@@ -58,6 +58,6 @@ public abstract class AbstractTestFrameworkDecorator extends AbstractTestFramewo
 
     @Override
     public void generateAfterClassToSaveObservations(CtType<?> testClass, List<CtMethod<?>> testsToRun) {
-        this.innerTestFramework.generateAfterClassToSaveObservations(testClass,testsToRun);
+        this.innerTestFramework.generateAfterClassToSaveObservations(testClass, testsToRun);
     }
 }

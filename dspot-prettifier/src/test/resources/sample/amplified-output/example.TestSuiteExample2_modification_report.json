@@ -1,0 +1,108 @@
+{
+  "reportsPerMethod": {
+    "test2_mg63_assSep152": [
+      {
+        "variableName": "__DSPOT_s_8",
+        "variableValue": "\"?i!rb0/|]6^FT)-ef\u0026bk\"",
+        "fromAssertion": false,
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport"
+      },
+      {
+        "variableName": "__DSPOT_index_9",
+        "variableValue": "-839241703",
+        "fromAssertion": false,
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport"
+      },
+      {
+        "invokedMethod": {
+          "name": "charAt",
+          "returnType": "char",
+          "parameters": [
+            {
+              "name": "s",
+              "type": "java.lang.String",
+              "value": "__DSPOT_s_8"
+            },
+            {
+              "name": "index",
+              "type": "int",
+              "value": "__DSPOT_index_9"
+            }
+          ]
+        },
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.MethodAdderOnExistingObjectsAmplifierReport"
+      },
+      {
+        "variableName": "o_test2_mg63__7",
+        "variableValue": "ex.charAt(__DSPOT_s_8, __DSPOT_index_9)",
+        "fromAssertion": true,
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport"
+      },
+      {
+        "assertMethodName": "assertEquals",
+        "assertMethodDeclaredType": "org.junit.Assert",
+        "testedValue": "o_test2_mg63__7",
+        "expectedValue": "\u0027?\u0027",
+        "assertionReport": true,
+        "reportType": "eu.stamp_project.dspot.common.report.output.assertiongenerator.ValueAssertionReport",
+        "assertionType": "ASSERT_EQUALS"
+      }
+    ],
+    "test2_mg63_assSep1": [
+      {
+        "variableName": "__DSPOT_s_8",
+        "variableValue": "\"?i!rb0/|]6^FT)-ef\u0026bk\"",
+        "fromAssertion": false,
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport"
+      },
+      {
+        "variableName": "__DSPOT_index_9",
+        "variableValue": "-839241703",
+        "fromAssertion": false,
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport"
+      },
+      {
+        "invokedMethod": {
+          "name": "charAt",
+          "returnType": "char",
+          "parameters": [
+            {
+              "name": "s",
+              "type": "java.lang.String",
+              "value": "__DSPOT_s_8"
+            },
+            {
+              "name": "index",
+              "type": "int",
+              "value": "__DSPOT_index_9"
+            }
+          ]
+        },
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.MethodAdderOnExistingObjectsAmplifierReport"
+      },
+      {
+        "variableName": "o_test2_mg63__7",
+        "variableValue": "((Example) (ex)).charAt(__DSPOT_s_8, __DSPOT_index_9)",
+        "fromAssertion": true,
+        "assertionReport": false,
+        "reportType": "eu.stamp_project.dspot.common.report.output.amplifiers.AddLocalVariableAmplifierReport"
+      },
+      {
+        "assertMethodName": "assertEquals",
+        "assertMethodDeclaredType": "org.junit.Assert",
+        "testedValue": "o_test2_mg63__7",
+        "expectedValue": "\u0027?\u0027",
+        "assertionReport": true,
+        "reportType": "eu.stamp_project.dspot.common.report.output.assertiongenerator.ValueAssertionReport",
+        "assertionType": "ASSERT_EQUALS"
+      }
+    ]
+  }
+}

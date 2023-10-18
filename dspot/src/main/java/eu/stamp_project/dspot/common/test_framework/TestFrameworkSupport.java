@@ -94,8 +94,19 @@ public interface TestFrameworkSupport {
 
     /**
      * This method detects whether or not the given element (test or suite) has been annotated to be ignored (JUnit4) or disabled (JUnit5)
+     *
      * @param candidate the test suite to check
      * @return true if the given test suite has been ignored/disabled
      */
     public boolean isIgnored(CtElement candidate);
+
+    /**
+     * This method identifies the kind of assert ({@link AssertEnum}) that the given method name represents.
+     * The answer is dependent on the test framework which is used for the passed test method.
+     *
+     * @param assertMethodName the simple name of the assert function
+     * @param testMethod       the test method used to determine the test framework
+     * @return the {@link AssertEnum} representing the type of the assertion
+     */
+    public AssertEnum classifyAssertMethod(String assertMethodName, CtMethod<?> testMethod);
 }

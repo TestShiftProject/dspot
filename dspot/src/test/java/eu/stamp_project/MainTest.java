@@ -15,10 +15,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**  
  * Created by Benjamin DANGLOT
@@ -222,7 +219,9 @@ public class MainTest {
         Main.main(new String[]{
                 "--verbose",
                 "--absolute-path-to-project-root", new File("src/test/resources/test-projects/").getAbsolutePath() + "/",
-                "--amplifiers", "MethodAdderOnExistingObjectsAmplifier",
+                "--amplifiers", "FastLiteralAmplifier,MethodDuplicationAmplifier,MethodRemoveAmplifier," +
+                "MethodAdderOnExistingObjectsAmplifier,ReturnValueAmplifier,NullifierAmplifier," +
+                "ArrayAmplifier",
                 "--test-criterion", "ExtendedCoverageSelector",
                 "--test", "example.TestSuiteExample2",
                 "--dev-friendly",

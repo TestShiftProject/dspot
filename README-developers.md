@@ -121,7 +121,7 @@ In this directory each directory is a project, with all required files and infor
       - `git_clone.log` is the log of the `git clone` command.
       - `git_pull.log` is the log of the last `git pull` command, if relevant.
 
-Please refer to [the dedicated README](dspot-web/v2/README.md) for information about how to install, configure, start and stop the application.
+Please refer to [the dedicated README](dspot-web/v2-mojo/README.md) for information about how to install, configure, start and stop the application.
 
 
 ## Contributing

@@ -5,6 +5,9 @@ import eu.stamp_project.dspot.selector.extendedcoverageselector.ExtendedCoverage
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class TestClassJSON implements eu.stamp_project.dspot.common.report.output.selector.TestClassJSON {
 
@@ -42,5 +45,14 @@ public class TestClassJSON implements eu.stamp_project.dspot.common.report.outpu
 
     public ExtendedCoverage getFullCoverageAfterAmplification() {
         return fullCoverageAfterAmplification;
+    }
+
+    public Map<String, TestCaseJSON> mapTestNameToResult() {
+        return getTestCases().stream().collect(Collectors.toMap(TestCaseJSON::getName, Function.identity()));
+    }
+
+    public void updateTestCase(TestCaseJSON oldTestCase, TestCaseJSON newTestCase) {
+        getTestCases().remove(oldTestCase);
+        addTestCase(newTestCase);
     }
 }
