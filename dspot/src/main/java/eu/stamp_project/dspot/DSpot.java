@@ -5,9 +5,13 @@ import eu.stamp_project.dspot.common.miscellaneous.AmplificationException;
 import eu.stamp_project.dspot.common.configuration.UserInput;
 import eu.stamp_project.dspot.common.report.GlobalReport;
 import eu.stamp_project.dspot.common.report.error.Error;
+import eu.stamp_project.dspot.selector.branchcoverageselector.clover.CloverExecutor;
+import eu.stamp_project.dspot.selector.branchcoverageselector.clover.CloverReader;
 import org.slf4j.Logger;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +51,7 @@ public class DSpot {
         GLOBAL_REPORT = configuration.getGlobalReport();
     }
 
-    public void run() {
+    public void run() throws IOException {
         for (CtType<?> testClassToBeAmplified : dSpotState.getTestClassesToBeAmplified()) {
             TestTuple tuple = setup.preAmplification(testClassToBeAmplified, dSpotState.getTestMethodsToBeAmplifiedNames());
             final List<CtMethod<?>> amplifiedTestMethods;

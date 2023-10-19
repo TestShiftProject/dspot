@@ -14,6 +14,8 @@ public interface InputAmplDistributor {
 
     List<CtMethod<?>> inputAmplify(List<CtMethod<?>> testMethods, int iteration);
 
+    List<CtMethod<?>> inputAmplify(List<CtMethod<?>> testMethods, int iteration, String TargetMethodName);
+
     void resetAmplifiers(CtType parentClass);
 
     boolean shouldBeRun();

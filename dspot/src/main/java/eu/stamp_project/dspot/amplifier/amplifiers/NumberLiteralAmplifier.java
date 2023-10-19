@@ -11,6 +11,7 @@ import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtFieldReference;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class NumberLiteralAmplifier extends AbstractLiteralAmplifier<Number> {
 
@@ -41,6 +42,11 @@ public class NumberLiteralAmplifier extends AbstractLiteralAmplifier<Number> {
             value = (((CtLiteral<Number>)literal).getValue()).doubleValue();
         }
         return createValues(valueIsNull,value,classOfLiteral,factory);
+    }
+
+    @Override
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
     }
 
     private Set<CtExpression<Number>> createValues(boolean valueIsNull,Double value,

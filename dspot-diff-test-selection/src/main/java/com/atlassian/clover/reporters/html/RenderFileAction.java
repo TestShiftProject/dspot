@@ -142,7 +142,7 @@ public class RenderFileAction implements Callable {
         try {
             insertLineInfos(insertSrcFileProperties(), testLineInfo);
         } catch (Exception e) {
-            Logger.getInstance().error("Invalid Java source found or Clover failed to parse it: " + fileInfo.getPhysicalFile().getAbsolutePath());
+            Logger.getInstance().error(" Render Invalid Java source found or Clover failed to parse it: " + fileInfo.getPhysicalFile().getAbsolutePath());
             velocity.put("filename", fileInfo.getPhysicalFile().getAbsolutePath());
             velocity.put("message", e.getMessage());
             List srclines = SourceRenderHelper.getSrcLines(fileInfo);
@@ -318,6 +318,18 @@ public class RenderFileAction implements Callable {
             final String testClassName = testCaseInfo.getRuntimeTypeName();
             final String testName = testCaseInfo.getTestName();
             JSONObject currentValues = jsonTestTargets.getJSONObject((String) key);
+            if(this.fileInfo.getName().split("\\.")[0].equals("Attribute")){
+                List<? extends BranchInfo> branches = this.fileInfo.getNamedClass("Attribute")
+                    .getAllMethods()
+                    .stream()
+                    .filter(methodInfo -> methodInfo.getSimpleName().equals("setValue"))
+                    .findFirst()
+                    .get()
+                    .getBranches();
+                branches.stream().map(branchInfo -> branchInfo.getTrueHitCount());
+            }
+
+
             ((List) currentValues.get("statements")).stream()
                     .map(list -> ((Map) list).get("sl"))
                     .forEach(line -> {

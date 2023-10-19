@@ -42,6 +42,19 @@ public class TextualDistanceInputAmplDistributor extends AbstractInputAmplDistri
     }
 
     /**
+     * Input amplification for a single test.
+     *
+     * @param test Test method
+     * @param i current iteration
+     * @param targetMethodName the method need test
+     * @return New generated tests
+     */
+    protected Stream<CtMethod<?>> inputAmplifyTest(CtMethod<?> test, int i, String targetMethodName) {
+        return this.amplifiers.parallelStream()
+                .flatMap(amplifier -> amplifier.amplify(test, i, targetMethodName));
+    }
+
+    /**
      * Input amplification of multiple tests.
      *
      * @param testMethods Test methods
@@ -54,6 +67,19 @@ public class TextualDistanceInputAmplDistributor extends AbstractInputAmplDistri
         List<CtMethod<?>> inputAmplifiedTests = testMethods.parallelStream()
                 .flatMap(test -> {
                     final Stream<CtMethod<?>> inputAmplifiedTestMethods = inputAmplifyTest(test, i);
+                    DSpotUtils.printProgress(testMethods.indexOf(test), testMethods.size());
+                    return inputAmplifiedTestMethods;
+                }).collect(Collectors.toList());
+        LOGGER.info("{} new tests generated", inputAmplifiedTests.size());
+        return reduce(inputAmplifiedTests);
+    }
+
+    @Override
+    public List<CtMethod<?>> inputAmplify(List<CtMethod<?>> testMethods, int i, String targetMethodName){
+        LOGGER.info("Amplification of inputs...");
+        List<CtMethod<?>> inputAmplifiedTests = testMethods.parallelStream()
+                .flatMap(test -> {
+                    final Stream<CtMethod<?>> inputAmplifiedTestMethods = inputAmplifyTest(test, i, targetMethodName);
                     DSpotUtils.printProgress(testMethods.indexOf(test), testMethods.size());
                     return inputAmplifiedTestMethods;
                 }).collect(Collectors.toList());

@@ -104,7 +104,7 @@ public class Output {
     private void writeProjectTimeJSON() {
         final File file1 = new File(this.outputPathDirectory);
         if (!file1.exists()) {
-            file1.mkdir();
+            file1.mkdirs();
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         final File file = new File(this.outputPathDirectory + "/" + this.projectTimeJSON.projectName + ".json");

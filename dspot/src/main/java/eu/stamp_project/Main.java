@@ -6,12 +6,14 @@ import eu.stamp_project.dspot.common.configuration.check.Checker;
 import eu.stamp_project.dspot.common.configuration.check.InputErrorException;
 import picocli.CommandLine;
 
+import java.io.IOException;
+
 /**
  * Created by Benjamin DANGLOT benjamin.danglot@inria.fr on 2/9/17
  */
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         UserInput userInput = parse(args);
         if(userInput == null){
             return;

@@ -8,6 +8,7 @@ public enum AmplifierEnum {
     MethodRemove(new TestMethodCallRemover()),
     FastLiteralAmplifier(new FastLiteralAmplifier()),
     MethodAdderOnExistingObjectsAmplifier(new MethodAdderOnExistingObjectsAmplifier()),
+    TargetMethodAdderOnExistingObjectsAmplifier(new TargetMethodAdderOnExistingObjectsAmplifier()),
     ReturnValueAmplifier(new ReturnValueAmplifier()),
     StringLiteralAmplifier(new StringLiteralAmplifier()),
     NumberLiteralAmplifier(new NumberLiteralAmplifier()),

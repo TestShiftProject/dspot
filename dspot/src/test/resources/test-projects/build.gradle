@@ -17,4 +17,8 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.8.2'
     implementation 'org.apache.logging.log4j:log4j-core:2.8.2'
     testImplementation 'junit:junit:4.12'
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 83a95628a0d0628be0e156673f0269e213b08878

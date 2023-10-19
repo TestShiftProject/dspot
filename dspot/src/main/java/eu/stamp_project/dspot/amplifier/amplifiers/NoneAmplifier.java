@@ -15,7 +15,9 @@ public class NoneAmplifier implements Amplifier {
     public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration) {
         return Stream.empty();
     }
-
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
+    }
     @Override
     public void reset(CtType<?> testClass) {
 

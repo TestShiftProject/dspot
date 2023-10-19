@@ -22,6 +22,8 @@ public interface Amplifier {
      */
     Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration);
 
+    Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName);
+
     void reset(CtType<?> testClass);
 
 }

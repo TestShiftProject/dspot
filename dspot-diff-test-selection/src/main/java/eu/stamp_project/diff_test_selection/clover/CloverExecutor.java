@@ -141,4 +141,16 @@ public class CloverExecutor {
         return mavenHome;
     }
 
+    public void instrumentAndRunGivenTestClass(String pathToRootOfProject, String testClass) {
+        final String testsOptionsValue = testClass;
+        System.out.println(testsOptionsValue);
+        setMavenHome();
+        runGoals(
+                pathToRootOfProject,
+                "clean",
+                "org.openclover:clover-maven-plugin:4.4.1:setup",
+                "test",
+                "-Dtest=" + testsOptionsValue
+        );
+    }
 }

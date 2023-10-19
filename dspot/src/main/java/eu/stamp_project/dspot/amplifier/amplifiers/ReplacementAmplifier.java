@@ -40,6 +40,11 @@ public class ReplacementAmplifier implements Amplifier {
     }
 
     @Override
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
+    }
+
+    @Override
     public void reset(CtType testClass) {
         AmplificationHelper.reset();
     }

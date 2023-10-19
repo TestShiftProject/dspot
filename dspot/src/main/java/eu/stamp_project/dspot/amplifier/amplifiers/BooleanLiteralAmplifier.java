@@ -7,6 +7,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class BooleanLiteralAmplifier extends AbstractLiteralAmplifier<Boolean> {
 
@@ -20,6 +21,11 @@ public class BooleanLiteralAmplifier extends AbstractLiteralAmplifier<Boolean> {
             );
         }
         return Collections.singleton(factory.createLiteral(!((CtLiteral<Boolean>)original).getValue()));
+    }
+
+    @Override
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
     }
 
     @Override

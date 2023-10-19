@@ -13,6 +13,7 @@ import spoon.support.reflect.code.CtNewArrayImpl;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Created by Andrew Bwogi
@@ -135,6 +136,11 @@ public class ArrayLiteralAmplifier extends AbstractLiteralAmplifier<CtNewArrayIm
             values.add(factory.createLiteral(null));
         }
         return values;
+    }
+
+    @Override
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
     }
 
     private String cropTypeName(String name) {

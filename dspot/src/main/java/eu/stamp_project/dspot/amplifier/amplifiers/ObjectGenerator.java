@@ -39,6 +39,11 @@ public class ObjectGenerator implements Amplifier {
 		return gen_o1;
 	}
 
+	@Override
+	public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+		return amplify(testMethod, iteration);
+	}
+
 	private List<CtLocalVariable<?>> getExistingObjects(CtMethod method) {
 		return method.getElements(new TypeFilter<CtLocalVariable<?>>(CtLocalVariable.class) {
 			@Override

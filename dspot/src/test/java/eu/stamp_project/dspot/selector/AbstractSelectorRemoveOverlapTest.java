@@ -31,6 +31,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -114,7 +115,7 @@ public abstract class AbstractSelectorRemoveOverlapTest {
     }
 
     @Test
-    public void testRemoveOverlappingTests() {
+    public void testRemoveOverlappingTests() throws IOException {
         this.testSelectorUnderTest.init();
         DSpotState dspotState = new DSpotState();
         dspotState.setDelta(0.1f);

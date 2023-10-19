@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -106,6 +107,11 @@ public class LiteralAmplifiersTest extends AbstractTestOnSample {
             @Override
             protected Set<CtExpression<Integer>> amplify(CtExpression<Integer> original, CtMethod<?> testMethod) {
                 return Collections.singleton(testMethod.getFactory().createLiteral(0));
+            }
+
+            @Override
+            public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+                return null;
             }
             @Override
             protected String getSuffix() {

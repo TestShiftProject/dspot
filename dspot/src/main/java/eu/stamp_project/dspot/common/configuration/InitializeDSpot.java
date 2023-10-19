@@ -39,6 +39,9 @@ public class InitializeDSpot {
         DSpotState.setUserInput(userInput);
         DSpotState.setOnlyInputAmplification(userInput.isOnlyInputAmplification());
         DSpotState.setDevFriendlyAmplification(userInput.isDevFriendlyAmplification());
+        DSpotState.setTargetMethod(userInput.getTargetMethod());
+        DSpotState.setTargetBranch(userInput.getTargetBranch());
+        DSpotState.setTargetClass(userInput.getTargetClass());
         DSpotState.verbose = userInput.isVerbose();
         DSpotState.setStartTime(System.currentTimeMillis());
         DSpotState.setTestFinder(new TestFinder(
@@ -148,6 +151,16 @@ public class InitializeDSpot {
             dependencies = automaticBuilder.compileAndBuildClasspath();
             configuration.setDependencies(dependencies);
         }
+        // TODO checks this. Since we support different Test Support, we may not need to add artificially junit in the classpath
+//        if (!dependencies.contains("junit" + File.separator + "junit" + File.separator + "4")) {
+//            dependencies = Test.class
+//                    .getProtectionDomain()
+//                    .getCodeSource()
+//                    .getLocation()
+//                    .getFile() +
+//                    AmplificationHelper.PATH_SEPARATOR + dependencies;
+//            System.out.println("dependencies at end of junit block: " + dependencies);
+//        }
         if (!additionalClasspathElements.isEmpty()) {
             String pathToAdditionalClasspathElements = additionalClasspathElements;
             if (!Paths.get(additionalClasspathElements).isAbsolute()) {

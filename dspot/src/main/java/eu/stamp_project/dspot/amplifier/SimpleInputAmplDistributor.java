@@ -26,7 +26,6 @@ public class SimpleInputAmplDistributor extends AbstractInputAmplDistributor {
     public SimpleInputAmplDistributor(int maxNumTests, List<Amplifier> amplifiers) {
         super(maxNumTests, amplifiers);
     }
-
     /**
      * Input amplification of multiple tests.
      *
@@ -71,6 +70,51 @@ public class SimpleInputAmplDistributor extends AbstractInputAmplDistributor {
         return amplifiedTestMethods;
     }
 
+    /**
+     * Input amplification of multiple tests.
+     *
+     * @param testMethods Test methods
+     * @param targetMethodName method to be tested
+     * @return New generated tests
+     */
+    @Override
+    public List<CtMethod<?>> inputAmplify(List<CtMethod<?>> testMethods, int iteration, String targetMethodName){
+        LOGGER.info("Amplification of inputs...");
+        final int budget = this.maxNumTests;
+        int totalBudget = this.maxNumTests;
+        // copy the amplifiers, we will remove amplifier that does not generate more test
+        final List<Amplifier> amplifiers = new ArrayList<>(this.amplifiers);
+        // copy the test methods to be amplified
+        final ArrayList<CtMethod<?>> testMethodsToBeAmplified = new ArrayList<>(testMethods);
+        // Amplify all method using all amplifiers
+        long time = System.currentTimeMillis();
+        final Map<Amplifier, Map<CtMethod<?>, List<CtMethod<?>>>> amplifiedTestMethodPerAmplifierPerTestMethod =
+                amplify(amplifiers, testMethodsToBeAmplified, iteration, targetMethodName);
+        LOGGER.info("Time to amplify: {}ms", System.currentTimeMillis() - time);
+
+        final List<CtMethod<?>> amplifiedTestMethods = new ArrayList<>();
+        while (totalBudget > 0 && !amplifiedTestMethodPerAmplifierPerTestMethod.isEmpty()) {
+            DSpotUtils.printProgress(budget - totalBudget, budget);
+            final int nbAmplifierRemaining = amplifiedTestMethodPerAmplifierPerTestMethod.size();
+            int budgetPerAmplifier = totalBudget / nbAmplifierRemaining;
+            if (budgetPerAmplifier == 0) { // not enough budget, we get last randomly and quit
+                amplifiedTestMethods.addAll(getLastAmplifiedMethods(totalBudget, amplifiedTestMethodPerAmplifierPerTestMethod));
+                break;
+            }
+            for (Amplifier amplifier : amplifiedTestMethodPerAmplifierPerTestMethod.keySet()) {
+                totalBudget = selectAndAddAmplifiedTestMethods(totalBudget,
+                        amplifiedTestMethodPerAmplifierPerTestMethod,
+                        amplifiedTestMethods,
+                        budgetPerAmplifier,
+                        amplifier
+                );
+            }
+            amplifiedTestMethodPerAmplifierPerTestMethod.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+        }
+        LOGGER.info("{} new tests generated", amplifiedTestMethods.size());
+        return amplifiedTestMethods;
+    }
+
     private Map<Amplifier, Map<CtMethod<?>, List<CtMethod<?>>>> amplify(List<Amplifier> amplifiers,
                                                                         ArrayList<CtMethod<?>> testMethodsToBeAmplified,
                                                                         int iteration) {
@@ -79,6 +123,21 @@ public class SimpleInputAmplDistributor extends AbstractInputAmplDistributor {
             amplifiedTestMethodPerAmplifierPerTestMethod.put(amplifier, new HashMap<>());
             for (CtMethod<?> testMethod : testMethodsToBeAmplified) {
                 final List<CtMethod<?>> amplification = amplifier.amplify(testMethod, 0).collect(Collectors.toList());
+                Collections.shuffle(amplification, RandomHelper.getRandom());
+                amplifiedTestMethodPerAmplifierPerTestMethod.get(amplifier).put(testMethod, amplification);
+            }
+        }
+        return amplifiedTestMethodPerAmplifierPerTestMethod;
+    }
+
+    private Map<Amplifier, Map<CtMethod<?>, List<CtMethod<?>>>> amplify(List<Amplifier> amplifiers,
+                                                                        ArrayList<CtMethod<?>> testMethodsToBeAmplified,
+                                                                        int iteration, String targetMethod) {
+        Map<Amplifier, Map<CtMethod<?>, List<CtMethod<?>>>> amplifiedTestMethodPerAmplifierPerTestMethod = new HashMap<>();
+        for (Amplifier amplifier : amplifiers) {
+            amplifiedTestMethodPerAmplifierPerTestMethod.put(amplifier, new HashMap<>());
+            for (CtMethod<?> testMethod : testMethodsToBeAmplified) {
+                final List<CtMethod<?>> amplification = amplifier.amplify(testMethod, 0, targetMethod).collect(Collectors.toList());
                 Collections.shuffle(amplification, RandomHelper.getRandom());
                 amplifiedTestMethodPerAmplifierPerTestMethod.get(amplifier).put(testMethod, amplification);
             }

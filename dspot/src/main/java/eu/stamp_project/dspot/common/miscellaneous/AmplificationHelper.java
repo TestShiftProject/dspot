@@ -115,7 +115,7 @@ public class AmplificationHelper {
         return currentTestClass;
     }
 
-    private static String getAmplifiedName(CtType<?> classTest) {
+    public static String getAmplifiedName(CtType<?> classTest) {
         return classTest.getSimpleName().startsWith("Test") ?
                 classTest.getSimpleName() + "Ampl" :
                 "Ampl" + classTest.getSimpleName();

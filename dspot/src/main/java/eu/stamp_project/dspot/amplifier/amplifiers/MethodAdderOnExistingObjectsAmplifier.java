@@ -21,7 +21,6 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings("unchecked")
 public class MethodAdderOnExistingObjectsAmplifier implements Amplifier {
-
     @Override
     public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration) {
         List<CtLocalVariable<?>> existingObjects = getExistingObjects(testMethod);
@@ -49,6 +48,11 @@ public class MethodAdderOnExistingObjectsAmplifier implements Amplifier {
                         )
                         .collect(Collectors.toList()).stream()
                 );
+    }
+
+    @Override
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
     }
 
     private List<CtLocalVariable<?>> getExistingObjects(CtMethod method) {

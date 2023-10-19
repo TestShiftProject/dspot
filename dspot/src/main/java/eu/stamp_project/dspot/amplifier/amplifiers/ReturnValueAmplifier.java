@@ -67,6 +67,11 @@ public class ReturnValueAmplifier implements Amplifier {
         return ampMethods.stream();
     }
 
+    @Override
+    public Stream<CtMethod<?>> amplify(CtMethod<?> testMethod, int iteration, String targetMethodName){
+        return amplify(testMethod, iteration);
+    }
+
     private void replaceInvocationByLocalVariable(CtStatement invocationToBeReplaced, CtLocalVariable localVariable) {
         if (invocationToBeReplaced.getParent() instanceof CtBlock) {
             invocationToBeReplaced.replace(localVariable);
@@ -107,4 +112,5 @@ public class ReturnValueAmplifier implements Amplifier {
     public void reset(CtType<?> testClass) {
 
     }
+
 }

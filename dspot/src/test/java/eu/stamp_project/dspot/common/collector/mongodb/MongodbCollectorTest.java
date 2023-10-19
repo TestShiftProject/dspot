@@ -21,6 +21,7 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
 import javax.mail.MessagingException;
+import java.io.IOException;
 
 public class MongodbCollectorTest {
 
@@ -39,7 +40,7 @@ public class MongodbCollectorTest {
 
     @Ignore
     @Test
-    public void testInfoSubmissionToMongodbPitMutantScoreSelector() {
+    public void testInfoSubmissionToMongodbPitMutantScoreSelector() throws IOException {
         // don't run this test if mongodb is not installed locally
         assumeTrue("true".equals(System.getProperty("doIntegrationTests")));
         Main.main(new String[]{
@@ -74,7 +75,7 @@ public class MongodbCollectorTest {
 
     @Ignore
     @Test
-    public void testInfoSubmissionToMongodbJacocoCoverageSelector() {
+    public void testInfoSubmissionToMongodbJacocoCoverageSelector() throws IOException {
         // don't run this test if mongodb is not installed locally
         assumeTrue("true".equals(System.getProperty("doIntegrationTests")));
         Main.main(new String[]{
@@ -105,7 +106,7 @@ public class MongodbCollectorTest {
     @Ignore
     @Test
     /* Should update an existing document then have tried sending an email at the end*/
-    public void testRestful() {
+    public void testRestful() throws IOException {
         // don't run this test if mongodb is not installed locally
         assumeTrue("true".equals(System.getProperty("doIntegrationTests")));
         Document initDoc = new Document("RepoSlug", "USER/Testing")

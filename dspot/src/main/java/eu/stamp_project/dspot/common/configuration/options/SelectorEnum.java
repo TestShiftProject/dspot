@@ -34,6 +34,12 @@ public enum SelectorEnum {
         public TestSelector buildSelector(AutomaticBuilder builder, UserInput configuration) {
             return new ExtendedCoverageSelector(builder, configuration);
         }
+    },
+    BranchCoverageSelector {
+        @Override
+        public TestSelector buildSelector(AutomaticBuilder builder, UserInput configuration) {
+            return new BranchCoverageSelector(builder, configuration);
+        }
     };
 
     public abstract TestSelector buildSelector(AutomaticBuilder builder, UserInput configuration);
